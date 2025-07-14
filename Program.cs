@@ -19,8 +19,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
-using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Channels;
+using System.Threading;
 
 namespace FFXIVMobile_Companion
 {
@@ -34,6 +35,7 @@ namespace FFXIVMobile_Companion
         public static string ADB_Pairing_IPAddress = "127.0.0.1";
         public static string SelectedTask = "none";
         public static Random RandomNumber = new Random();
+        public static Status RemoteStatus = new Status();
 
         private static void Main(string[] args)
         {
@@ -62,8 +64,9 @@ namespace FFXIVMobile_Companion
             WriteLine("Final Fantasy XIV Mobile Companion (Created by Aida Enna)");
             WriteLine("Source/Credits: " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
             var entryAssembly = Assembly.GetEntryAssembly();
-            var fileInfo = new FileInfo(entryAssembly.Location);
-            WriteLine(Color.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + " | Codename: ???]");
+            RemoteStatus = Functions.GetRemoteStatus();
+            //https://umamusume.com/characters
+            WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + Functions.TerminalURL(RemoteStatus.Codename, "https://umamusume.com/characters/" + RemoteStatus.Codename.ToLower().Replace(" ",""))  + "]");
 
             /*
             ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
@@ -73,10 +76,9 @@ namespace FFXIVMobile_Companion
              ██████  ██      ██████  ██   ██    ██    ███████      ██████ ██   ██ ███████  ██████ ██   ██
             */
             string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
-            Status RemoteStatus = Functions.GetRemoteStatus();
             if (File.Exists(entryAssembly.Location + ".bak"))
             {
-                File.Delete(entryAssembly.Location + ".bak"); 
+                File.Delete(entryAssembly.Location + ".bak");
             }
 #if !DEBUG
             if (CurrentMD5 != RemoteStatus.ProgramMD5)
@@ -265,9 +267,9 @@ namespace FFXIVMobile_Companion
                     }
                     string ConnectionResult = ADB("connect " + ADB_IPAddress, true);
                     WriteLine(Color.Blue + ConnectionResult);
-                    if (ConnectionResult.Contains("cannot resolve host"))
+                    if (ConnectionResult.Contains("cannot resolve host") || ConnectionResult.Contains("usage: adb connect"))
                     {
-                        WriteLine("Connection failed, please check your IP and port and try again!");
+                        WriteLine(Color.Red + "Connection failed, please check your IP and port and try again!");
                         continue;
                     }
                     ADBConnected = true;
@@ -383,6 +385,9 @@ namespace FFXIVMobile_Companion
             }
             WriteLine("Opening game, enjoy!");
             WriteLine(ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1"));
+            WriteLine(Color.Green + "Task completed - Closing program in 30 seconds...");
+            Thread.Sleep(30000);
+            Environment.Exit(0);
         }
 
         public static void UpdateStoryPatch()
@@ -398,24 +403,33 @@ namespace FFXIVMobile_Companion
                 WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
             }
 
-            WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
-            try
+            string LocalDBHash = "";
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
             {
-                Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
             }
-            catch
+
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
             {
-                WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-                WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
-                Environment.Exit(1);
+                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
+                try
+                {
+                    Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                }
+                catch
+                {
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
+                    Environment.Exit(1);
+                }
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                {
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
+                    Environment.Exit(1);
+                }
+                WriteLine(Color.Green + "Translations downloaded successfully!");
             }
-            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-            {
-                WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-                WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
-                Environment.Exit(1);
-            }
-            WriteLine(Color.Green + "Translations downloaded successfully!");
 
             //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
             //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
@@ -426,6 +440,9 @@ namespace FFXIVMobile_Companion
 
             WriteLine("Opening game, enjoy!");
             WriteLine(ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1"));
+            WriteLine(Color.Green + "Task completed - Closing program in 30 seconds...");
+            Thread.Sleep(30000);
+            Environment.Exit(0);
         }
 
         public static string ADB(string Command, bool RawCommand = false)

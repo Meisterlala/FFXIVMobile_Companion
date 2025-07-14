@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("FFXIVMobile_Companion")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("FFXIVMobile Companion")]
+[assembly: AssemblyDescription("Modifies your FFXIV Mobile game install with language options and fixes!")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FFXIVMobile_Companion")]
+[assembly: AssemblyCompany("Arks-Layer (Aida Enna)")]
+[assembly: AssemblyProduct("")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("127.0.0.1")]
+[assembly: AssemblyFileVersion("127.0.0.1")]

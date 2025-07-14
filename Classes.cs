@@ -88,6 +88,12 @@ namespace FFXIVMobile_Companion
 
         [JsonPropertyName("ProgramUpdateURL")]
         public string ProgramUpdateURL { get; set; }
+        
+        [JsonPropertyName("BuildDate")]
+        public string BuildDate { get; set; }
+        
+        [JsonPropertyName("Codename")]
+        public string Codename { get; set; }
     };
 
     public class MyWebClient : WebClient
