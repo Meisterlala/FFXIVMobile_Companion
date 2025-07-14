@@ -40,5 +40,28 @@ namespace FFXIVMobile_Companion
                 Thread.Sleep(16);
             }
         }
+        public static bool ValidateIPAndPort(string IPAndPort)
+        {
+            if (String.IsNullOrWhiteSpace(IPAndPort))
+            {
+                Console.WriteLine(Colors.Red + "Please enter a valid IP address and port." + Colors.Default);
+                return false;
+            }
+
+            string[] splitValues = IPAndPort.Split('.');
+            if (splitValues.Length != 4)
+            {
+                Console.WriteLine(Colors.Red + "Please enter a valid IP address and port." + Colors.Default);
+                return false;
+            }
+
+            if (!IPAndPort.Contains(":")) 
+            {
+                Console.WriteLine(Colors.Red + "Please enter a valid IP address and port." + Colors.Default); 
+                return false; 
+            }
+
+            return true;
+        }
     }
 }
