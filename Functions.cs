@@ -4,7 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,6 +25,30 @@ namespace FFXIVMobile_Companion
 
             cURL_Process.Start();
             cURL_Process.WaitForExit();
+        }
+
+        public static Status GetRemoteStatus()
+        {
+            try
+            {
+                string data;
+                using (MyWebClient client = new MyWebClient { Encoding = Encoding.UTF8, Timeout = 10000, Proxy = null })
+                {
+                    data = client.DownloadString("http://cdn.arks-layer.com/na/tab_status.json");
+                }
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new JsonStringEnumConverter() }
+                };
+
+                return JsonSerializer.Deserialize<Status>(data, options);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
         }
 
         public static bool ValidateIPAndPort(string IPAndPort)
@@ -42,6 +69,17 @@ namespace FFXIVMobile_Companion
             }
 
             return true;
+        }
+        public static string CalculateMD5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(filename))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToUpper();
+                }
+            }
         }
     }
 }

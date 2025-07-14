@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace FFXIVMobile_Companion
 {
@@ -74,6 +76,15 @@ namespace FFXIVMobile_Companion
         public static GameLanguage French = new GameLanguage { LongName = "French", ShortName = "fr" };
         public static GameLanguage Chinese = new GameLanguage { LongName = "Chinese", ShortName = "zh" };
         public static GameLanguage None = new GameLanguage { LongName = "None", ShortName = "None" };
+    };
+
+    public struct Status
+    {
+        [JsonPropertyName("ProgramMD5")]
+        public string ProgramMD5 { get; set; }
+
+        [JsonPropertyName("TranslationMD5")]
+        public string TranslationMD5 { get; set; }
     };
 
     public class MyWebClient : WebClient

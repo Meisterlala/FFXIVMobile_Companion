@@ -64,6 +64,10 @@ namespace FFXIVMobile_Companion
             var entryAssembly = Assembly.GetEntryAssembly();
             var fileInfo = new FileInfo(entryAssembly.Location);
             WriteLine(Color.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + " | Codename: Potato]");
+
+            string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
+            Status RemoteStatus = Functions.GetRemoteStatus();
+
             /*
              █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
             ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██
@@ -97,8 +101,11 @@ namespace FFXIVMobile_Companion
                 WriteLine(Color.Green + "ADB downloaded and installed successfully!");
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), @"adb.zip"));
             }
-            if (AdvancedMode) { WriteLine(Color.Red + "[Advanced mode enabled - Here be dragons]", true); }
-            WriteLine(Environment.NewLine);
+            if (AdvancedMode) 
+            {
+                WriteLine(Color.Red + "[Advanced mode enabled - Here be dragons]");
+            }
+            WriteLine(Environment.NewLine, true);
             /*
             ███████ ██ ██████  ███████ ████████     ███████ ███████ ██      ███████  ██████ ████████ ██  ██████  ███    ██
             ██      ██ ██   ██ ██         ██        ██      ██      ██      ██      ██         ██    ██ ██    ██ ████   ██
@@ -306,28 +313,6 @@ namespace FFXIVMobile_Companion
             return Console.ReadKey().KeyChar.ToString();
         }
 
-        //public static void ChangeUILanguage()
-        //{
-        //    WriteLine(Color.Yellow + "Please keep in mind that changing the language for the " + Style.Underline + "first time will require" + Style.Default + Color.Yellow + " redownloading the entire game as if you just installed it for the first time.");
-        //    do
-        //    {
-        //        switch (SelectTask())
-        //        {
-        //            case "1":
-        //                //Go to installing the UI shit
-        //                break;
-
-        //            case "2":
-        //                //Go to updating the MSQ dialog shit
-        //                break;
-
-        //            default:
-        //                WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
-        //                break;
-        //        }
-        //    } while (SelectedTask == "none");
-        //}
-
         public static void ChangeLanguage()
         {
             WriteLine(Environment.NewLine);
@@ -345,7 +330,7 @@ namespace FFXIVMobile_Companion
             string StringToWrite = @"[Internationalization]\\nCulture=" + SelectedLanguage.ShortName;
             WriteLine("Changing language to " + SelectedLanguage.LongName);
             WriteLine(ADB("shell echo " + StringToWrite + " >> /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini"));
-            bool DoesPAKExist = ADBFileExist("/storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.13_Android_ASTC_13_P.pak");
+            bool DoesPAKExist = ADBFileExist("/storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak");
             if (DoesPAKExist)
             {
                 WriteLine("Renaming PAK files to fix language issues");
