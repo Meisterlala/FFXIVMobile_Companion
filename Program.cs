@@ -15,14 +15,19 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace FFXIVMobile_Companion
 {
     internal class Program
     {
+        public static string BuildDate;
+
         static void Main(string[] args)
         {
             /*TODO: 
@@ -30,6 +35,7 @@ namespace FFXIVMobile_Companion
              - REM Add checking for ADB and downloading an ADB zip from Github if not found
             */
 
+            
 
             //http://patorjk.com/software/taag/#p=display&f=ANSI%20Shadow&t=MEKABOT
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -40,9 +46,17 @@ namespace FFXIVMobile_Companion
             Console.WriteLine("██║     ██║     ██╔╝ ██╗██║ ╚████╔╝ ██║ ╚═╝ ██║╚██████╗");
             Console.WriteLine("╚═╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═╝     ╚═╝ ╚═════╝");
             Console.ResetColor();
-            Console.WriteLine("[Final Fantasy XIV Mobile Language Selector, created by Aida Enna/Thaun]");
-            Console.WriteLine("Source code: \u001b[94mhttps://github.com/Aida-Enna/FFXIVM_Language_Selector\u001b[0m");
+            WriteLine("[Final Fantasy XIV Mobile Companion, created by Aida Enna]");
+            WriteLine("Source code: " + Colors.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var fileInfo = new FileInfo(entryAssembly.Location);
+            WriteLine(Colors.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + "]");
             Console.ReadLine();
+        }
+
+        public static void WriteLine(string Text)
+        {
+            Console.WriteLine(Text + Colors.Default);
         }
     }
 }
