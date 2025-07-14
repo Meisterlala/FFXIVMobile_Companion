@@ -47,7 +47,6 @@ namespace FFXIVMobile_Companion
             /*TODO:
             - Add LDPlayer support
             - Implement a check system for program updates/language updates using a remote JSON
-            - Implement an updater (squirrel? writing a bat file to just download the latest?)
             - Implement a config JSON to remember your IP and possibly the language you select?
             */
 
@@ -64,7 +63,7 @@ namespace FFXIVMobile_Companion
             WriteLine("Source/Credits: " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
             var entryAssembly = Assembly.GetEntryAssembly();
             var fileInfo = new FileInfo(entryAssembly.Location);
-            WriteLine(Color.Yellow + "[Built2 on " + fileInfo.LastWriteTime.ToString() + " | Codename: ???]");
+            WriteLine(Color.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + " | Codename: ???]");
 
             /*
             ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
@@ -75,14 +74,35 @@ namespace FFXIVMobile_Companion
             */
             string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
             Status RemoteStatus = Functions.GetRemoteStatus();
+            if (File.Exists(entryAssembly.Location + ".bak"))
+            {
+                File.Delete(entryAssembly.Location + ".bak"); 
+            }
+#if !DEBUG
             if (CurrentMD5 != RemoteStatus.ProgramMD5)
             {
-                WriteLine("A new version is available, downloading now...");
-                Functions.DownloadFile(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
-                Process.Start(entryAssembly.Location); // to start new instance of application
-                Environment.Exit(0);
+                try
+                {
+                    WriteLine("A new version is available, downloading now...");
+                    File.Move(entryAssembly.Location, entryAssembly.Location + ".bak");
+                    Functions.DownloadFile(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
+                    CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
+                    if (CurrentMD5 != RemoteStatus.ProgramMD5)
+                    {
+                        WriteLine(Color.Red + "Updating failed! Please download the latest version at " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
+                    }
+                    else
+                    {
+                        Process.Start(entryAssembly.Location); // to start new instance of application
+                        Environment.Exit(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLine(Color.Red + "Updating failed! Please download the latest version at " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
+                }
             }
-
+#endif
             /*
              █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
             ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██
