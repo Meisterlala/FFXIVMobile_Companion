@@ -34,7 +34,7 @@ namespace FFXIVMobile_Companion
                 string data;
                 using (MyWebClient client = new MyWebClient { Encoding = Encoding.UTF8, Timeout = 10000, Proxy = null })
                 {
-                    data = client.DownloadString("http://cdn.arks-layer.com/na/tab_status.json");
+                    data = client.DownloadString("http://aida.moe/ffxiv_mobile/status.json");
                 }
 
                 var options = new JsonSerializerOptions

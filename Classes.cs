@@ -85,6 +85,9 @@ namespace FFXIVMobile_Companion
 
         [JsonPropertyName("TranslationMD5")]
         public string TranslationMD5 { get; set; }
+
+        [JsonPropertyName("ProgramUpdateURL")]
+        public string ProgramUpdateURL { get; set; }
     };
 
     public class MyWebClient : WebClient

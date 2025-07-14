@@ -20,6 +20,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace FFXIVMobile_Companion
 {
@@ -63,10 +64,24 @@ namespace FFXIVMobile_Companion
             WriteLine("Source/Credits: " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
             var entryAssembly = Assembly.GetEntryAssembly();
             var fileInfo = new FileInfo(entryAssembly.Location);
-            WriteLine(Color.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + " | Codename: Potato]");
+            WriteLine(Color.Yellow + "[Built2 on " + fileInfo.LastWriteTime.ToString() + " | Codename: ???]");
 
+            /*
+            ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
+            ██    ██ ██   ██ ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
+            ██    ██ ██████  ██   ██ ███████    ██    █████       ██      ███████ █████   ██      █████
+            ██    ██ ██      ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
+             ██████  ██      ██████  ██   ██    ██    ███████      ██████ ██   ██ ███████  ██████ ██   ██
+            */
             string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
             Status RemoteStatus = Functions.GetRemoteStatus();
+            if (CurrentMD5 != RemoteStatus.ProgramMD5)
+            {
+                WriteLine("A new version is available, downloading now...");
+                Functions.DownloadFile(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
+                Process.Start(entryAssembly.Location); // to start new instance of application
+                Environment.Exit(0);
+            }
 
             /*
              █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
@@ -101,7 +116,7 @@ namespace FFXIVMobile_Companion
                 WriteLine(Color.Green + "ADB downloaded and installed successfully!");
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), @"adb.zip"));
             }
-            if (AdvancedMode) 
+            if (AdvancedMode)
             {
                 WriteLine(Color.Red + "[Advanced mode enabled - Here be dragons]");
             }
@@ -460,6 +475,7 @@ namespace FFXIVMobile_Companion
             }
             return false;
         }
+
         public static bool ADBFileExist(string Filename)
         {
             string ADBFileExistString = ADB("ls " + Filename);
