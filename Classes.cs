@@ -20,11 +20,31 @@ namespace FFXIVMobile_Companion
         /// <summary>Green, typically indicating success</summary>
         public const string Green = "\u001b[92m";
 
+        /// <summary>Magenta, used to draw attention to something</summary>
+        public const string Magenta = "\u001b[95m";
+
         /// <summary>Red, typically an error</summary>
         public const string Red = "\u001b[91m";
 
         /// <summary>Yellow, typically something that -may- be wrong or may not</summary>
         public const string Yellow = "\u001b[93m";
+    }
+
+    public static class Style
+    {
+        //List of styles here: https://i.imgur.com/v25JiRU.png
+
+        /// <summary>Bold</summary>
+        public const string Bold = "\u001b[1m";
+
+        /// <summary>Inverse foreground <-> background</summary>
+        public const string Inverse = "\u001b[7m";
+
+        /// <summary>Underline</summary>
+        public const string Underline = "\u001b[4m";
+
+        /// <summary>The default console style, typically used at the end of strings</summary>
+        public const string Default = "\u001b[0m";
     }
 
     public static class ConnectionType

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,40 +14,19 @@ namespace FFXIVMobile_Companion
     {
         public static void DownloadFile(string address, string filename)
         {
-            MyWebClient Client = new MyWebClient { Encoding = Encoding.UTF8, Timeout = 10000, Proxy = null };
+            var cURL_Process = new Process();
+            var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output " + filename);
+            cURL_StartInfo.UseShellExecute = true;
+            cURL_StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            cURL_Process.StartInfo = cURL_StartInfo;
 
-            Client.Headers.Set("user-agent", "FFXIVMC (Built: " + Program.BuildDate + ")");
-
-            Client.Timeout = 10000;
-
-            while (Client.IsBusy)
-            {
-                Thread.Sleep(16);
-            }
-            if (File.Exists(filename))
-            {
-                try
-                {
-                    File.Delete(filename);
-                }
-                catch
-                {
-                }
-            }
-            Client.DownloadFileAsync(new Uri(address), filename);
-
-            while (Client.IsBusy)
-            {
-                Thread.Sleep(16);
-            }
+            cURL_Process.Start();
+            cURL_Process.WaitForExit();
         }
+
         public static bool ValidateIPAndPort(string IPAndPort)
         {
-            if (String.IsNullOrWhiteSpace(IPAndPort))
-            {
-                Console.WriteLine(Color.Red + "Please enter a valid IP address and port." + Color.Default);
-                return false;
-            }
+            if (string.IsNullOrWhiteSpace(IPAndPort)) { return true; }
 
             string[] splitValues = IPAndPort.Split('.');
             if (splitValues.Length != 4)
