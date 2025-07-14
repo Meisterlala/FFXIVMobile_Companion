@@ -11,3 +11,5 @@
 /obj
 #Custom
 *.suo
+/files
+/AYA
