@@ -26,7 +26,7 @@ namespace FFXIVMobile_Companion
     {
         public static string BuildDate;
         public static bool AdvancedMode = false;
-        public static string SelectedLanguage = "none";
+        public static GameLanguage SelectedLanguage = GameLanguage.None;
         public static string SelectedConnectionType = "none";
         public static string ADB_IPAddress = "127.0.0.1";
         public static string ADB_Pairing_IPAddress = "127.0.0.1";
@@ -57,21 +57,28 @@ namespace FFXIVMobile_Companion
             Console.WriteLine("╚═╝     ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚═╝     ╚═╝ ╚═════╝");
             Console.ResetColor();
             WriteLine("[Final Fantasy XIV Mobile Companion, created by Aida Enna]");
-            WriteLine("Source code: " + Colors.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
+            WriteLine("Source code: " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
             var entryAssembly = Assembly.GetEntryAssembly();
             var fileInfo = new FileInfo(entryAssembly.Location);
-            WriteLine(Colors.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + "]", true);
+            WriteLine(Color.Yellow + "[Built on " + fileInfo.LastWriteTime.ToString() + "]", true);
+            /*
+             █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██ 
+            ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██  
+            ███████ ██   ██ ██████      ██      ███████ █████   ██      █████   
+            ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██  
+            ██   ██ ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██ 
+            */
             if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"adb\adb.exe")))
             {
-                WriteLine(Colors.Red + "ADB Folder/file does not exist! (Checked \"" + Directory.GetCurrentDirectory() + "\")\nAttempting to fix by downloading required files...");
+                WriteLine(Color.Red + "ADB Folder/file does not exist! (Checked \"" + Directory.GetCurrentDirectory() + "\")\nAttempting to fix by downloading required files...");
                 try
                 {
                     Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVMobile_Companion/blob/main/extras/adb.zip?raw=true", "adb.zip");
                 }
                 catch
                 {
-                    WriteLine(Colors.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
-                    WriteLine(Colors.Red + "The program will now exit. Please try again after fixing the above issue.");
+                    WriteLine(Color.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
+                    WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
                     Environment.Exit(1);
                 }
                 if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"adb.zip")))
@@ -80,79 +87,95 @@ namespace FFXIVMobile_Companion
                 }
                 else
                 {
-                    WriteLine(Colors.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
-                    WriteLine(Colors.Red + "The program will now exit. Please try again after fixing the above issue.");
+                    WriteLine(Color.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
+                    WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
                     Environment.Exit(1);
                 }
-                WriteLine(Colors.Green + "ADB downloaded and installed successfully!");
+                WriteLine(Color.Green + "ADB downloaded and installed successfully!");
                 File.Delete(Path.Combine(Directory.GetCurrentDirectory(), @"adb.zip"));
             }
-            if (AdvancedMode) { WriteLine(Colors.Red + "[Advanced mode enabled - Here be dragons]"); }
+            if (AdvancedMode) { WriteLine(Color.Red + "[Advanced mode enabled - Here be dragons]"); }
             WriteLine(Environment.NewLine);
+            /*
+            ███████ ██ ██████  ███████ ████████     ███████ ███████ ██      ███████  ██████ ████████ ██  ██████  ███    ██ 
+            ██      ██ ██   ██ ██         ██        ██      ██      ██      ██      ██         ██    ██ ██    ██ ████   ██ 
+            █████   ██ ██████  ███████    ██        ███████ █████   ██      █████   ██         ██    ██ ██    ██ ██ ██  ██ 
+            ██      ██ ██   ██      ██    ██             ██ ██      ██      ██      ██         ██    ██ ██    ██ ██  ██ ██ 
+            ██      ██ ██   ██ ███████    ██        ███████ ███████ ███████ ███████  ██████    ██    ██  ██████  ██   ████
+            */
             do
             {
                 switch (SelectLanguage())
                 {
                     case "1":
-                        SelectedLanguage = "en";
+                        SelectedLanguage = GameLanguage.English;
                         break;
 
                     case "2":
-                        SelectedLanguage = "jp";
+                        SelectedLanguage = GameLanguage.Japanese;
                         break;
 
                     case "3":
-                        SelectedLanguage = "ko";
+                        SelectedLanguage = GameLanguage.Korean;
                         break;
 
                     case "4":
-                        SelectedLanguage = "de";
+                        SelectedLanguage = GameLanguage.German;
                         break;
 
                     case "5":
-                        SelectedLanguage = "fr";
+                        SelectedLanguage = GameLanguage.French;
                         break;
 
                     case "6":
-                        SelectedLanguage = "zh";
+                        SelectedLanguage = GameLanguage.Chinese;
                         break;
 
                     default:
-                        WriteLine(Colors.Red + " Invalid selection! Please try again." + Environment.NewLine);
+                        WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
                         break;
                 }
-            } while (SelectedLanguage == "none");
+            } while (SelectedLanguage.LongName != "None");
+
+
 
             WriteLine(Environment.NewLine);
+            /*
+             ██████  ██████  ███    ██ ███    ██ ███████  ██████ ████████ ██  ██████  ███    ██     ████████ ██    ██ ██████  ███████ 
+            ██      ██    ██ ████   ██ ████   ██ ██      ██         ██    ██ ██    ██ ████   ██        ██     ██  ██  ██   ██ ██      
+            ██      ██    ██ ██ ██  ██ ██ ██  ██ █████   ██         ██    ██ ██    ██ ██ ██  ██        ██      ████   ██████  █████   
+            ██      ██    ██ ██  ██ ██ ██  ██ ██ ██      ██         ██    ██ ██    ██ ██  ██ ██        ██       ██    ██      ██      
+             ██████  ██████  ██   ████ ██   ████ ███████  ██████    ██    ██  ██████  ██   ████        ██       ██    ██      ███████
+            */
             do
             {
                 switch (SelectConnectionType())
                 {
                     case "1":
-                        SelectedConnectionType = ConnectionTypes.USB;
+                        SelectedConnectionType = ConnectionType.USB;
                         break;
 
                     case "2":
-                        SelectedConnectionType = ConnectionTypes.WiFi;
+                        SelectedConnectionType = ConnectionType.WiFi;
                         break;
 
                     case "3":
-                        SelectedConnectionType = ConnectionTypes.MuMu;
+                        SelectedConnectionType = ConnectionType.MuMu;
                         ADB_IPAddress = "127.0.0.1:7555";
                         break;
 
                     case "4":
-                        SelectedConnectionType = ConnectionTypes.BlueStacks;
+                        SelectedConnectionType = ConnectionType.BlueStacks;
                         ADB_IPAddress = "127.0.0.1:5555";
                         break;
 
                     default:
-                        WriteLine(Colors.Red + " Invalid selection! Please try again." + Environment.NewLine);
+                        WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
                         break;
                 }
             } while (SelectedConnectionType == "none");
 
-            if (SelectedConnectionType == ConnectionTypes.USB)
+            if (SelectedConnectionType == ConnectionType.USB)
             {
                 WriteLine(" 1. Go to Settings → About Phone → Software Information");
                 WriteLine(" 2. Tap 'Build number' 7 times until you see 'Developer mode enabled'");
@@ -162,9 +185,8 @@ namespace FFXIVMobile_Companion
                 WriteLine(" 5. Press enter once plugged in and ready");
                 WriteLine(" (If you have a Xiaomi device, you may need to enable 'USB debugging(Security Settings)' and 'Install via USB')");
                 Console.ReadLine();
-                WriteLine(" Attempting to complete task via USB...");
             }
-            else if (SelectedConnectionType == ConnectionTypes.WiFi)
+            else if (SelectedConnectionType == ConnectionType.WiFi)
             {
                 WriteLine(" 1. Go to Settings → About Phone → Software Information");
                 WriteLine(" 2. Tap 'Build number' 7 times until you see 'Developer mode enabled'");
@@ -179,14 +201,22 @@ namespace FFXIVMobile_Companion
                 } while (Functions.ValidateIPAndPort(ADB_Pairing_IPAddress) == false);
                 
                 WriteLine("Pairing...");
-                WriteLine(Colors.Blue + ADB("pair " + ADB_Pairing_IPAddress));
-                WriteLine(Colors.Blue + ADB("disconnect"));
-                //adb\adb.exe pair ADB_Pairing_IPAddress
-                //adb\adb.exe disconnect
+                WriteLine(Color.Blue + ADB("pair " + ADB_Pairing_IPAddress));
+                WriteLine(Color.Blue + ADB("disconnect"));
                 WriteLine("Enter the IP address & Port (not the pairing one, the one in the wireless debugging settings): ", true);
                 ADB_IPAddress = Console.ReadLine();
-                WriteLine("Attempting to complete task via WiFi...");
+                WriteLine(Color.Blue + ADB("connect " + ADB_IPAddress, true));
             }
+
+            /*
+            ███████ ███████ ██      ███████  ██████ ████████     ████████  █████  ███████ ██   ██ 
+            ██      ██      ██      ██      ██         ██           ██    ██   ██ ██      ██  ██  
+            ███████ █████   ██      █████   ██         ██           ██    ███████ ███████ █████   
+                 ██ ██      ██      ██      ██         ██           ██    ██   ██      ██ ██  ██  
+            ███████ ███████ ███████ ███████  ██████    ██           ██    ██   ██ ███████ ██   ██ 
+            */
+
+
         }
 
         public static string SelectLanguage()
@@ -205,13 +235,13 @@ namespace FFXIVMobile_Companion
 
         public static string SelectOperation()
         {
-            WriteLine(Colors.Green + "What would you like to do?");
+            WriteLine(Color.Green + "What would you like to do?");
             WriteLine("1. Download the latest non-UI translations");
             WriteLine(Environment.NewLine);
             if (AdvancedMode)
             {
-                WriteLine(Colors.Red + "A. [ADV] Change language without wiping data");
-                WriteLine(Colors.Red + "B. [ADV] Rename PAK Files without wiping data");
+                WriteLine(Color.Red + "A. [ADV] Change language without wiping data");
+                WriteLine(Color.Red + "B. [ADV] Rename PAK Files without wiping data");
             }
             Console.Write("Type your choice: ");
             return Console.ReadKey().KeyChar.ToString();
@@ -219,9 +249,9 @@ namespace FFXIVMobile_Companion
 
         public static string SelectConnectionType()
         {
-            WriteLine(Colors.Green + "What device are you using?");
-            WriteLine("1. An actual phone (" + Colors.Blue + "over USB" + Colors.Default + ")");
-            WriteLine("2. An actual phone (" + Colors.Blue + "over WiFi" + Colors.Default + ")");
+            WriteLine(Color.Green + "What device are you using?");
+            WriteLine("1. An actual phone (" + Color.Blue + "over USB" + Color.Default + ")");
+            WriteLine("2. An actual phone (" + Color.Blue + "over WiFi" + Color.Default + ")");
             WriteLine("3. MuMu");
             WriteLine("4. BlueStacks");
 
@@ -230,20 +260,36 @@ namespace FFXIVMobile_Companion
             return Console.ReadKey().KeyChar.ToString();
         }
 
-        public static string ADB(string Command)
+        public static string SelectTask()
+        {
+            WriteLine(Color.Green + "What do you want to to?");
+            WriteLine("1. An actual phone (" + Color.Blue + "over USB" + Color.Default + ")");
+            WriteLine("2. An actual phone (" + Color.Blue + "over WiFi" + Color.Default + ")");
+            WriteLine("3. MuMu");
+            WriteLine("4. BlueStacks");
+
+            WriteLine(Environment.NewLine);
+            Console.Write("Type your choice: ");
+            return Console.ReadKey().KeyChar.ToString();
+        }
+
+        public static string ADB(string Command, bool RawCommand = false)
         {
             try
             {
-                switch (SelectedConnectionType)
+                if (!RawCommand)
                 {
-                    case ConnectionTypes.USB:
-                        Command = "-d " + Command;
-                        break;
-                    case ConnectionTypes.WiFi:
-                    case ConnectionTypes.MuMu:
-                    case ConnectionTypes.BlueStacks:
-                        Command = "-s " + ADB_IPAddress + " " + Command;
-                        break;
+                    switch (SelectedConnectionType)
+                    {
+                        case ConnectionType.USB:
+                            Command = "-d " + Command;
+                            break;
+                        case ConnectionType.WiFi:
+                        case ConnectionType.MuMu:
+                        case ConnectionType.BlueStacks:
+                            Command = "-s " + ADB_IPAddress + " " + Command;
+                            break;
+                    }
                 }
 
                 var ADBProcess = new Process
@@ -263,11 +309,11 @@ namespace FFXIVMobile_Companion
                 string ReturnString = ADBProcess.StandardOutput.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
                 if (string.IsNullOrWhiteSpace(ReturnString))
                 {
-                    return Colors.Red + "ERROR - " + ADBProcess.StandardError.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim(); ;
+                    return Color.Red + "ERROR - " + ADBProcess.StandardError.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim(); ;
                 }
                 else
                 {
-                    return Colors.Cyan + ReturnString; 
+                    return Color.Cyan + ReturnString; 
                 }                    
             }
             catch(Exception ex)
@@ -280,11 +326,11 @@ namespace FFXIVMobile_Companion
         {
             if (NoNewLine)
             {
-                Console.Write(Text + Colors.Default);
+                Console.Write(Text + Color.Default);
             }
             else
             {
-                Console.WriteLine(Text + Colors.Default);
+                Console.WriteLine(Text + Color.Default);
             }
         }
     }

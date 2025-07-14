@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FFXIVMobile_Companion
-{ 
-    public static class Colors
+{
+    public static class Color
     {
         //List of colors here: https://i.imgur.com/v25JiRU.png
-        
+
         /// <summary>Blue, typically an URL</summary>
         public const string Blue = "\u001b[94m";
 
@@ -30,7 +27,7 @@ namespace FFXIVMobile_Companion
         public const string Yellow = "\u001b[93m";
     }
 
-    public static class ConnectionTypes
+    public static class ConnectionType
     {
         /// <summary>A USB connection, uses 'adb -d' for commands</summary>
         public const string USB = "USB";
@@ -44,6 +41,20 @@ namespace FFXIVMobile_Companion
         /// <summary>BlueStacks emulator, uses 'adb -s 127.0.0.1:5555' for commands</summary>
         public const string BlueStacks = "BlueStacks";
     }
+
+    public class GameLanguage
+    {
+        public string LongName { get; set; }
+        public string ShortName { get; set; }
+
+        public static GameLanguage English = new GameLanguage { LongName = "English", ShortName = "en" };
+        public static GameLanguage Japanese = new GameLanguage { LongName = "Japanese", ShortName = "ja" };
+        public static GameLanguage Korean = new GameLanguage { LongName = "Korean", ShortName = "ko" };
+        public static GameLanguage German = new GameLanguage { LongName = "German", ShortName = "de" };
+        public static GameLanguage French = new GameLanguage { LongName = "French", ShortName = "fr" };
+        public static GameLanguage Chinese = new GameLanguage { LongName = "Chinese", ShortName = "zh" };
+        public static GameLanguage None = new GameLanguage { LongName = "None", ShortName = "None" };
+    };
 
     public class MyWebClient : WebClient
     {
