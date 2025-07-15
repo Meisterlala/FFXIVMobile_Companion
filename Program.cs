@@ -515,14 +515,14 @@ namespace FFXIVMobile_Companion
         public static string SelectTask()
         {
             WriteLine(Color.Green + "What do you want to do?");
-            WriteLine("1. Change language to " + Color.Blue + SelectedLanguage.LongName + " and/or download/update the story patch");
+            WriteLine("1. Change language to " + SelectedLanguage.LongName + " and/or install/update the story patch");
             if (AdvancedMode)
             {
                 WriteLine(Color.Red + "A. [ADV] Non root UI swap");
             }
             WriteLine("\n" + Color.Yellow + "If you've just installed the game on a non-rooted device" + Color.Default + ", you need to go through a one-time setup to change languages.");
             WriteLine("If that's the case, please select one of the options below:");
-            WriteLine("0. Initial setup for " + Color.Blue + "non-rooted devices");
+            WriteLine("0. Initial setup for non-rooted devices");
 
             WriteLine("\n" + Color.Yellow + "If you haven't installed the game yet" + Color.Default + ", you can select the following option to download/install it for you:");
             WriteLine("A. Download/Install FFXIV Mobile");
