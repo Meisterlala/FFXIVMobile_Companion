@@ -22,7 +22,6 @@ namespace FFXIVMobile_Companion
         {
             var cURL_Process = new Process();
             var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output \"" + filename + "\"");
-            Console.WriteLine("cURL arguments: " + "/C curl -L " + address + " --output \"" + filename + "\"");
             cURL_StartInfo.UseShellExecute = true;
             cURL_StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             cURL_Process.StartInfo = cURL_StartInfo;

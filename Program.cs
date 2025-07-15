@@ -99,11 +99,11 @@ namespace FFXIVMobile_Companion
             WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + Functions.TerminalURL(RemoteStatus.Codename, "https://umamusume.com/characters/" + RemoteStatus.Codename.ToLower().Replace(" ", "")) + "]");
 
             /*
-             █████  ██████   ██████  ███████ 
-            ██   ██ ██   ██ ██       ██      
-            ███████ ██████  ██   ███ ███████ 
-            ██   ██ ██   ██ ██    ██      ██ 
-            ██   ██ ██   ██  ██████  ███████ 
+             █████  ██████   ██████  ███████
+            ██   ██ ██   ██ ██       ██
+            ███████ ██████  ██   ███ ███████
+            ██   ██ ██   ██ ██    ██      ██
+            ██   ██ ██   ██  ██████  ███████
             */
 
             if (args.Length > 0)
@@ -584,43 +584,7 @@ namespace FFXIVMobile_Companion
                 Close(false);
             }
 
-            //Check for new story patch updates
-            string LocalDBHash = "";
-            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-            {
-                LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-            }
-
-            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
-            {
-                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations, please wait...");
-                try
-                {
-                    WriteLine("Part 1");
-                    Functions.DownloadFile(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-                }
-                catch
-                {
-                    try
-                    {
-                        WriteLine("Part 2");
-                        Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-                    }
-                    catch
-                    {
-                        WriteLine("Part 3");
-                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
-                        Close(false);
-                    }
-                }
-                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-                {
-                    WriteLine("Part 4");
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
-                    Close(false);
-                }
-                WriteLine(Color.Green + "Translations downloaded successfully!");
-            }
+            CheckForStoryPatchUpdates();
 
             //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
             //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
@@ -753,38 +717,7 @@ namespace FFXIVMobile_Companion
                 Close(false);
             }
 
-            string LocalDBHash = "";
-            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-            {
-                LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-            }
-
-            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
-            {
-                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations, please wait...");
-                try
-                {
-                    Functions.DownloadFile(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-                }
-                catch
-                {
-                    try
-                    {
-                        Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-                    }
-                    catch
-                    {
-                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
-                        Close(false);
-                    }
-                }
-                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-                {
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
-                    Close(false);
-                }
-                WriteLine(Color.Green + "Translations downloaded successfully!");
-            }
+            CheckForStoryPatchUpdates();
 
             //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
             //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
@@ -996,6 +929,47 @@ namespace FFXIVMobile_Companion
                 return true;
             }
             return false;
+        }
+
+        public static void CheckForStoryPatchUpdates()
+        {
+            //Check for new story patch updates
+            string LocalDBHash = "";
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+            {
+                LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+            }
+
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
+            {
+                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations, please wait...");
+                try
+                {
+                    Functions.DownloadFile(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                }
+                catch
+                {
+                    try
+                    {
+                        Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    }
+                    catch
+                    {
+                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
+                        Close(false);
+                    }
+                }
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                {
+                    Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                    {
+                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
+                        Close(false);
+                    }
+                }
+                WriteLine(Color.Green + "Translations downloaded successfully!");
+            }
         }
 
         public static void WriteLine(string Text)
