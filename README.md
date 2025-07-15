@@ -22,7 +22,7 @@ A reminder that you should **never** install or open WeChat on your emulator, yo
 
 ## Usage
 
-1. Go to where you downloaded the file and open it (if you get a warning from Windows Smartscreen select "Run anyway")
+1. Go to where you downloaded the file and open it (if you get a warning from Windows Smartscreen select `Run anyway`)
 2. Follow the directions on the window that opens
 
 It's that easy!
