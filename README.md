@@ -22,10 +22,9 @@ A reminder that you should **never** install or open WeChat on your emulator, yo
 
 ## Usage
 
-1. Go to where you downloaded the file and open it (if you get a warning from Windows Smartscreen select `Run anyway`)
-2. Follow the directions on the window that opens
-
-It's that easy!
+Open the file you downloaded and follow the directions - it's that easy!  
+If you get a warning from Windows Smartscreen select `Run anyway` - [You can check out a virus scan of the exe here](https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1)  
+(or copy the URL and test it yourself)
 
 ## Known Issues
 
