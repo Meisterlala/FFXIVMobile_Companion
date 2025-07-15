@@ -27,48 +27,6 @@ A reminder that you should **never** install or open WeChat on your emulator, yo
 
 It's that easy!
 
-## Advanced Usage
-
-Here is a list of arguments that the program accepts. If you don't know what that means, then you can skip this part.
-
-Flag: -adv
-Mainly me to test features I'm in the middle of writing, unlocks 'Advanced Mode'
-
-Flag: -lang
-Usage: -lang=language_code_here
-Example: -lang=en
-Used to specify which language you'd like your game to be in, skipping the selection
-Valid codes are:
-"en" (English)
-"ja" (Japanese)
-"ko" (Korean)
-"de" (German)
-"fr" (French)
-"zh" (Chinese)
-
-Flag: -usb
-Used to specify that you'll be connecting over USB, skipping the selection
-
-Flag: -wifi
-Used to specify that you'll be connecting over WiFi, skipping the selection
-
-Flag: -mumu
-Used to specify that you'll be connecting to the MuMu emulator, skipping the selection
-
-Flag: -bluestacks
-Used to specify that you'll be connecting to the BlueStacks emulator, skipping the selection
-
-Flag: -nopair
-Used to specify that you want to skip pairing your device for WiFi (useful if it's already paired)
-
-Flag: -ip
-Usage: -ip=IPAddress_and_Port
-Example: -ip=192.168.1.5:40850
-Used to specify the IP you want to connect to for non-USB connections, skipping the input for it
-
-Flag: -initialsetup
-Usage: 
-
 ## Known Issues
 
 * Potions are no longer usable via the quick item bag
@@ -93,3 +51,52 @@ If you'd like to donate/support what I do, please check out the following:
 [Patreon](https://www.patreon.com/PSO2)
 
 Thank you very much, every bit helps!
+
+## Advanced Usage
+
+Here is a list of arguments that the program accepts. You can combine them in any order, for example:
+
+`-ip=192.168.1.7:39065 -lang=en -wifi -nopair -updatepatch`  
+would select English, select wifi, connect to the specified IP without pairing, and then update the patch
+
+Flag: `-adv`  
+Mainly for me to test features I'm in the middle of writing, unlocks 'Advanced Mode'
+
+Flag: `-lang`  
+Usage: `-lang=language_code_here`  
+Example: `-lang=en`  
+Used to specify which language you'd like your game to be in, skipping the selection
+
+Valid codes are:  
+`en` (English)  
+`ja` (Japanese)  
+`ko` (Korean)  
+`de` (German)  
+`fr` (French)  
+`zh` (Chinese)  
+
+Flag: `-usb`  
+Used to specify that you'll be connecting over USB, skipping the selection
+
+Flag: `-wifi`  
+Used to specify that you'll be connecting over WiFi, skipping the selection
+
+Flag: `-mumu`  
+Used to specify that you'll be connecting to the MuMu emulator, skipping the selection
+
+Flag: `-bluestacks`  
+Used to specify that you'll be connecting to the BlueStacks emulator, skipping the selection  
+
+Flag: `-nopair`  
+Used to specify that you want to skip pairing your device for WiFi (useful if it's already paired)
+
+Flag: `-ip`  
+Usage: `-ip=IPAddress_and_Port`  
+Example: `-ip=192.168.1.5:40850`  
+Used to specify the IP you want to connect to for non-USB connections, skipping the input for it
+
+Flag: `-initialsetup`  
+Used to specify that you want to do the initial (I have the game installed but need to patch it) setup
+
+Flag: `-updatepatch`  
+Used to specify that you want to update the patch and/or change the language to the specified language
