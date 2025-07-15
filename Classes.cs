@@ -49,7 +49,7 @@ namespace FFXIVMobile_Companion
         public const string Default = "\u001b[0m";
     }
 
-    public static class ConnectionType
+    public class ConnectionType
     {
         /// <summary>A USB connection, uses 'adb -d' for commands</summary>
         public const string USB = "USB";
@@ -62,6 +62,9 @@ namespace FFXIVMobile_Companion
 
         /// <summary>BlueStacks emulator, uses 'adb -s 127.0.0.1:5555' for commands</summary>
         public const string BlueStacks = "BlueStacks";
+
+        /// <summary>No connect type yet specified</summary>
+        public const string None = "None";
     }
 
     public class GameLanguage
@@ -76,6 +79,7 @@ namespace FFXIVMobile_Companion
         public static GameLanguage French = new GameLanguage { LongName = "French", ShortName = "fr" };
         public static GameLanguage Chinese = new GameLanguage { LongName = "Chinese", ShortName = "zh" };
         public static GameLanguage None = new GameLanguage { LongName = "None", ShortName = "None" };
+        public static GameLanguage InitialSetup = new GameLanguage { LongName = "Initial Setup", ShortName = "Initial Setup" };
     };
 
     public struct Status

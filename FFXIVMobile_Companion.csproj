@@ -17,8 +17,8 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
-  <AssemblyInformationalVersion>1.0.0+BuildTime.$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</AssemblyInformationalVersion>
-</PropertyGroup>
+    <AssemblyInformationalVersion>1.0.0+BuildTime.$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</AssemblyInformationalVersion>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
@@ -89,11 +89,11 @@
   <ItemGroup>
     <Compile Include="Classes.cs" />
     <Compile Include="Functions.cs" />
-  <Compile Include="Program.cs">
-    <Metadata>
-      <BuildTime>$(BuildDateTime)</BuildTime>
-    </Metadata>
-  </Compile>
+    <Compile Include="Program.cs">
+      <Metadata>
+        <BuildTime>$(BuildDateTime)</BuildTime>
+      </Metadata>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
