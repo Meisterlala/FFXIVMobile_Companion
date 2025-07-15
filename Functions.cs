@@ -21,12 +21,43 @@ namespace FFXIVMobile_Companion
         {
             var cURL_Process = new Process();
             var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output " + filename);
+            Console.WriteLine("cURL arguments: " + "/C curl -L " + address + " --output " + filename);
             cURL_StartInfo.UseShellExecute = true;
             cURL_StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             cURL_Process.StartInfo = cURL_StartInfo;
 
             cURL_Process.Start();
             cURL_Process.WaitForExit();
+        }
+
+        public static void DownloadFileFallback(string address, string filename)
+        {
+            MyWebClient Client = new MyWebClient { Encoding = Encoding.UTF8, Timeout = 10000, Proxy = null };
+
+            Client.Headers.Set("user-agent", "FFXIVM Companion");
+
+            Client.Timeout = 10000;
+
+            while (Client.IsBusy)
+            {
+                Thread.Sleep(16);
+            }
+            if (File.Exists(filename))
+            {
+                try
+                {
+                    File.Delete(filename);
+                }
+                catch
+                {
+                }
+            }
+            Client.DownloadFileAsync(new Uri(address), filename);
+
+            while (Client.IsBusy)
+            {
+                Thread.Sleep(16);
+            }
         }
 
         public static Status GetRemoteStatus()

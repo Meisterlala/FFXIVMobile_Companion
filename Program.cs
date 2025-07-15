@@ -202,7 +202,7 @@ namespace FFXIVMobile_Companion
             //    {
             //        WriteLine("A new version is available, downloading now...");
             //        File.Move(entryAssembly.Location, entryAssembly.Location + ".bak");
-            //        Functions.DownloadFile(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
+            //        Functions.DownloadFileFallback(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
             //        CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
             //        if (CurrentMD5 != RemoteStatus.ProgramMD5)
             //        {
@@ -236,8 +236,15 @@ namespace FFXIVMobile_Companion
                 }
                 catch
                 {
-                    WriteLine(Color.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
-                    Close(false);
+                    try
+                    {
+                        Functions.DownloadFileFallback("https://github.com/Aida-Enna/FFXIVMobile_Companion/blob/main/extras/adb.zip?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "adb.zip"));
+                    }
+                    catch
+                    {
+                        WriteLine(Color.Red + "Failed to download ADB! Please re-extract the zip file you downloaded and make sure to extract -all- the files!");
+                        Close(false);
+                    }
                 }
                 if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"adb.zip")))
                 {
@@ -574,19 +581,30 @@ namespace FFXIVMobile_Companion
 
             if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
             {
-                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
+                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations, please wait...");
                 try
                 {
-                    Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    WriteLine("Part 1");
+                    Functions.DownloadFile(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
                 }
                 catch
                 {
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-                    Close(false);
+                    try
+                    {
+                        WriteLine("Part 2");
+                        Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    }
+                    catch
+                    {
+                        WriteLine("Part 3");
+                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
+                        Close(false);
+                    }
                 }
                 if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
                 {
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    WriteLine("Part 4");
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
                     Close(false);
                 }
                 WriteLine(Color.Green + "Translations downloaded successfully!");
@@ -731,19 +749,26 @@ namespace FFXIVMobile_Companion
 
             if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
             {
-                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
+                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations, please wait...");
                 try
                 {
-                    Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    Functions.DownloadFile(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
                 }
                 catch
                 {
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-                    Close(false);
+                    try
+                    {
+                        Functions.DownloadFileFallback(RemoteStatus.TranslationUpdateURL, Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                    }
+                    catch
+                    {
+                        WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
+                        Close(false);
+                    }
                 }
                 if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
                 {
-                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from " + RemoteStatus.TranslationUpdateURL + " and put it with this program.");
                     Close(false);
                 }
                 WriteLine(Color.Green + "Translations downloaded successfully!");
@@ -826,17 +851,24 @@ namespace FFXIVMobile_Companion
             Write(Environment.NewLine);
             if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk")))
             {
-                WriteLine("Downloading FFXIV Mobile installer APK (" + RemoteStatus.FFXIVM_APKURL + ")");
+                WriteLine("Downloading FFXIV Mobile installer APK (" + RemoteStatus.FFXIVM_APKURL + "), please wait...");
                 try
                 {
                     Functions.DownloadFile(RemoteStatus.FFXIVM_APKURL, Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk"));
                 }
                 catch
                 {
-                    WriteLine(Color.Red + "Failed to download installer APK! Please download it from " + RemoteStatus.FFXIVM_APKURL + " and put it with this program.");
-                    Close(false);
+                    try
+                    {
+                        Functions.DownloadFileFallback(RemoteStatus.FFXIVM_APKURL, Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk"));
+                    }
+                    catch
+                    {
+                        WriteLine(Color.Red + "Failed to download installer APK! Please download it from " + RemoteStatus.FFXIVM_APKURL + " and put it with this program.");
+                        Close(false);
+                    }
                 }
-                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk")))
                 {
                     WriteLine(Color.Red + "Failed to download installer APK! Please download it from " + RemoteStatus.FFXIVM_APKURL + " and put it with this program.");
                     Close(false);
@@ -852,6 +884,9 @@ namespace FFXIVMobile_Companion
 
         public static void Close(bool Success = true)
         {
+            //Terminate ADB stuff
+            ADB("disconnect");
+            ADB("kill-server");
             if (Success)
             {
                 WriteLine(Color.Green + "Task completed - Closing program in 20 seconds...");
