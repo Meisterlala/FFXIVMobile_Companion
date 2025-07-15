@@ -447,33 +447,40 @@ namespace FFXIVMobile_Companion
             ███████ ███████ ███████ ███████  ██████    ██           ██    ██   ██ ███████ ██   ██
             */
             Write(Environment.NewLine);
-            do
+            if (DoInitialSetup)
             {
-                switch (SelectTask())
+                InitialSetup();
+            }
+            else
+            {
+                do
                 {
-                    case "0":
-                        //Download/Fix the story patch
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 0" + Environment.NewLine);
-                        InitialSetup();
-                        break;
+                    switch (SelectTask())
+                    {
+                        case "0":
+                            //Download/Fix the story patch
+                            File.AppendAllText("FFXIVMC.log", "-> User selected 0" + Environment.NewLine);
+                            InitialSetup();
+                            break;
 
-                    case "1":
-                        //Change the language to the specified
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
-                        ChangeLanguage();
-                        break;
+                        case "1":
+                            //Change the language to the specified
+                            File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
+                            ChangeLanguage();
+                            break;
 
-                    case "A":
-                    case "a":
-                        //Install the game
-                        InstallGame();
-                        break;
+                        case "A":
+                        case "a":
+                            //Install the game
+                            InstallGame();
+                            break;
 
-                    default:
-                        WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
-                        break;
-                }
-            } while (SelectedTask == "None");
+                        default:
+                            WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
+                            break;
+                    }
+                } while (SelectedTask == "None");
+            }
         }
 
         public static string SelectLanguage()
@@ -544,9 +551,9 @@ namespace FFXIVMobile_Companion
                 WriteLine("Closing game");
                 WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
             }
-            
+
             WriteLine("Deleting exiting config INI file (if it exists)");
-            WriteLine(ADB("shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini", SilenceOutput:true));
+            WriteLine(ADB("shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini", SilenceOutput: true));
 
             string StringToWrite = @"[Internationalization]\\nCulture=" + SelectedLanguage.ShortName;
             WriteLine("Changing language to " + SelectedLanguage.LongName);
@@ -638,6 +645,7 @@ namespace FFXIVMobile_Companion
             ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
             Close();
         }
+
         public static void InitialSetup()
         {
             /*
@@ -659,12 +667,17 @@ namespace FFXIVMobile_Companion
                 Close();
             }
             WriteLine("Continuing with setup");
+            if (IsGameOpen())
+            {
+                WriteLine("Closing game");
+                WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
+            }
             /*
             echo [0mClearing local game data if it exists (an error here is OK!)[36m
             adb\adb.exe -s %ip% shell pm clear com.tencent.tmgp.fmgame
             */
             WriteLine("Clearing local game data");
-            //WriteLine(ADB("shell pm clear com.tencent.tmgp.fmgame"));
+            WriteLine(ADB("shell pm clear com.tencent.tmgp.fmgame"));
 
             //echo [0mCreating folder for language change[36m
             //adb\adb.exe -s %ip% shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/
@@ -683,6 +696,15 @@ namespace FFXIVMobile_Companion
             if (ADBResult.Contains("ERROR - "))
             {
                 WriteLine(Color.Red + "Failed to create the /1.0.2.0/Dolphin/Paks/ folder, make sure your phone is connected and you followed all the steps!");
+                Close(false);
+            }
+
+            WriteLine("Creating folder for story patch");
+            ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to create the files/Database/ folder, make sure your phone is connected and you followed all the steps!");
                 Close(false);
             }
 
@@ -730,20 +752,20 @@ namespace FFXIVMobile_Companion
             //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
             //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
             WriteLine("Applying story patch");
-            ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
-            WriteLine(ADBResult);
-            if (ADBResult.Contains("ERROR - "))
-            {
-                WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
-                Close(false);
-            }
-            ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-            WriteLine(ADBResult);
-            if (ADBResult.Contains("ERROR - "))
-            {
-                WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
-                Close(false);
-            }
+            //ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
+            //WriteLine(ADBResult);
+            //if (ADBResult.Contains("ERROR - "))
+            //{
+            //    WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
+            //    Close(false);
+            //}
+            //ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
+            //WriteLine(ADBResult);
+            //if (ADBResult.Contains("ERROR - "))
+            //{
+            //    WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
+            //    Close(false);
+            //}
             ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
@@ -955,7 +977,7 @@ namespace FFXIVMobile_Companion
         }
 
         // usage: WriteColor("This is my [message] with inline [color] changes.", ConsoleColor.Yellow);
-        static void WriteColor(string message, ConsoleColor color)
+        private static void WriteColor(string message, ConsoleColor color)
         {
             var pieces = Regex.Split(message, @"(\[[^\]]*\])");
 
