@@ -77,7 +77,10 @@ namespace FFXIVMobile_Companion
 
         [JsonPropertyName("ProgramUpdateURL")]
         public string ProgramUpdateURL { get; set; }
-        
+
+        [JsonPropertyName("FFXIVM_APKURL")]
+        public string FFXIVM_APKURL { get; set; }
+
         [JsonPropertyName("BuildDate")]
         public string BuildDate { get; set; }
         

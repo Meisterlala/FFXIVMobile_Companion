@@ -463,17 +463,11 @@ namespace FFXIVMobile_Companion
                         ChangeLanguage();
                         break;
 
-                    //case "2":
-                    //    //Download/Fix the story patch
-                    //    File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
-                    //    UpdateStoryPatch();
-                    //    break;
-
-                    //case "A":
-                    //case "a":
-                    ////For testing shit
-                    //    TestNonRootUISwap();
-                    //    break;
+                    case "A":
+                    case "a":
+                        //Install the game
+                        InstallGame();
+                        break;
 
                     default:
                         WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine);
@@ -521,13 +515,18 @@ namespace FFXIVMobile_Companion
         public static string SelectTask()
         {
             WriteLine(Color.Green + "What do you want to do?");
-            WriteLine("1. Change language to " + Color.Blue + SelectedLanguage.LongName + " and download/update the story patch");
+            WriteLine("1. Change language to " + Color.Blue + SelectedLanguage.LongName + " and/or download/update the story patch");
             if (AdvancedMode)
             {
                 WriteLine(Color.Red + "A. [ADV] Non root UI swap");
             }
-            WriteLine("\n" + Color.Green + "If you've just installed the game and are playing on a non-rooted device" + Color.Default + ", you'll need to go through a one-time setup to change languages. If that's the case, please select one of the options below:");
+            WriteLine("\n" + Color.Yellow + "If you've just installed the game on a non-rooted device" + Color.Default + ", you need to go through a one-time setup to change languages.");
+            WriteLine("If that's the case, please select one of the options below:");
             WriteLine("0. Initial setup for " + Color.Blue + "non-rooted devices");
+
+            WriteLine("\n" + Color.Yellow + "If you haven't installed the game yet" + Color.Default + ", you can select the following option to download/install it for you:");
+            WriteLine("A. Download/Install FFXIV Mobile");
+
             Console.Write("\nType your choice: ");
             return Console.ReadKey().KeyChar.ToString();
         }
@@ -639,82 +638,6 @@ namespace FFXIVMobile_Companion
             ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
             Close();
         }
-
-        //public static void UpdateStoryPatch()
-        //{
-        //    WriteLine(Environment.NewLine);
-        //    /*
-        //    adb\adb.exe -s %ip% shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-        // adb\adb.exe -s %ip% shell echo "[Internationalization]\\nCulture=%lang%" ">>" /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-        //    */
-        //    if (IsGameOpen())
-        //    {
-        //        WriteLine("Closing game");
-        //        WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
-        //    }
-
-        //    string LocalDBHash = "";
-        //    if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-        //    {
-        //        LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-        //    }
-
-        //    if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
-        //    {
-        //        WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
-        //        try
-        //        {
-        //            Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
-        //        }
-        //        catch
-        //        {
-        //            WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-        //            Close(false);
-        //        }
-        //        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
-        //        {
-        //            WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
-        //            Close(false);
-        //        }
-        //        WriteLine(Color.Green + "Translations downloaded successfully!");
-        //    }
-
-        //    //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
-        //    //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
-        //    WriteLine("Applying story patch");
-        //    string ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
-        //    WriteLine(ADBResult);
-        //    if (ADBResult.Contains("ERROR - "))
-        //    {
-        //        WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
-        //        Close(false);
-        //    }
-        //    ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-        //    WriteLine(ADBResult);
-        //    if (ADBResult.Contains("ERROR - "))
-        //    {
-        //        WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
-        //        Close(false);
-        //    }
-        //    ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-        //    WriteLine(ADBResult);
-        //    if (ADBResult.Contains("ERROR - "))
-        //    {
-        //        WriteLine(Color.Red + "Failed to apply the story patch (pushing the DB) - Is your game set up correctly? Please do the initial set up if not.");
-        //        Close(false);
-        //    }
-        //    ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
-        //    WriteLine(ADBResult);
-        //    if (ADBResult.Contains("ERROR - "))
-        //    {
-        //        WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
-        //        Close(false);
-        //    }
-        //    WriteLine("Story patch applied! The game will now open, enjoy!");
-        //    ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
-        //    Close();
-        //}
-
         public static void InitialSetup()
         {
             /*
@@ -876,6 +799,35 @@ namespace FFXIVMobile_Companion
             Close();
         }
 
+        public static void InstallGame()
+        {
+            Write(Environment.NewLine);
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk")))
+            {
+                WriteLine("Downloading FFXIV Mobile installer APK (" + RemoteStatus.FFXIVM_APKURL + ")");
+                try
+                {
+                    Functions.DownloadFile(RemoteStatus.FFXIVM_APKURL, Path.Combine(Directory.GetCurrentDirectory(), "ffxiv_m.apk"));
+                }
+                catch
+                {
+                    WriteLine(Color.Red + "Failed to download installer APK! Please download it from " + RemoteStatus.FFXIVM_APKURL + " and put it with this program.");
+                    Close(false);
+                }
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                {
+                    WriteLine(Color.Red + "Failed to download installer APK! Please download it from " + RemoteStatus.FFXIVM_APKURL + " and put it with this program.");
+                    Close(false);
+                }
+                WriteLine(Color.Green + "Installer APK downloaded successfully!");
+            }
+            WriteLine("Installing FFXIV Mobile...");
+            WriteLine("A prompt may open on your phone - Please click " + Color.Green + "Install");
+            WriteLine(ADB("install ffxiv_m.apk"));
+            WriteLine("Install completed!");
+            Close();
+        }
+
         public static void Close(bool Success = true)
         {
             if (Success)
@@ -1000,6 +952,28 @@ namespace FFXIVMobile_Companion
             if (Text == "") { return; }
             File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", ""));
             Console.Write(Text + Color.Default);
+        }
+
+        // usage: WriteColor("This is my [message] with inline [color] changes.", ConsoleColor.Yellow);
+        static void WriteColor(string message, ConsoleColor color)
+        {
+            var pieces = Regex.Split(message, @"(\[[^\]]*\])");
+
+            for (int i = 0; i < pieces.Length; i++)
+            {
+                string piece = pieces[i];
+
+                if (piece.StartsWith("[") && piece.EndsWith("]"))
+                {
+                    Console.ForegroundColor = color;
+                    piece = piece.Substring(1, piece.Length - 2);
+                }
+
+                Console.Write(piece);
+                Console.ResetColor();
+            }
+
+            Console.WriteLine();
         }
 
         public static string Random()
