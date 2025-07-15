@@ -83,6 +83,9 @@ namespace FFXIVMobile_Companion
         
         [JsonPropertyName("Codename")]
         public string Codename { get; set; }
+
+        [JsonPropertyName("BadFiles")]
+        public List<string> BadFiles { get; set; }
     };
 
     public class MyWebClient : WebClient
