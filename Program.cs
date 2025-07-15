@@ -394,8 +394,14 @@ namespace FFXIVMobile_Companion
                     } while (Functions.ValidateIPAndPort(ADB_Pairing_IPAddress) == false);
                     if (!string.IsNullOrWhiteSpace(ADB_Pairing_IPAddress))
                     {
+                        string PairingCode = "";
+                        do
+                        {
+                            Write("Enter the Wi-Fi pairing code: ");
+                            PairingCode = Console.ReadLine();
+                        } while (string.IsNullOrWhiteSpace(PairingCode));
                         WriteLine("Pairing...");
-                        WriteLine(ADB("pair " + ADB_Pairing_IPAddress));
+                        WriteLine(ADB("pair " + ADB_Pairing_IPAddress + " " + PairingCode));
                     }
                 }
             }
