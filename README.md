@@ -22,10 +22,9 @@ A reminder that you should **never** install or open WeChat on your emulator, yo
 
 ## Usage
 
-1. Go to where you downloaded the file and open it (if you get a warning from Windows Smartscreen select "Run anyway")
-2. Follow the directions on the window that opens
-
-It's that easy!
+Open the file you downloaded and follow the directions - it's that easy!  
+If you get a warning from Windows Smartscreen select `Run anyway` - [You can check out a virus scan of the exe here](https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1)  
+(or copy the URL and test it yourself)
 
 ## Known Issues
 
@@ -51,3 +50,52 @@ If you'd like to donate/support what I do, please check out the following:
 [Patreon](https://www.patreon.com/PSO2)
 
 Thank you very much, every bit helps!
+
+## Advanced Usage
+
+Here is a list of arguments that the program accepts. You can combine them in any order, for example:
+
+`-ip=192.168.1.7:39065 -lang=en -wifi -nopair -updatepatch`  
+would select English, select wifi, connect to the specified IP without pairing, and then update the patch
+
+Flag: `-adv`  
+Mainly for me to test features I'm in the middle of writing, unlocks 'Advanced Mode'
+
+Flag: `-lang`  
+Usage: `-lang=language_code_here`  
+Example: `-lang=en`  
+Used to specify which language you'd like your game to be in, skipping the selection
+
+Valid codes are:  
+`en` (English)  
+`ja` (Japanese)  
+`ko` (Korean)  
+`de` (German)  
+`fr` (French)  
+`zh` (Chinese)  
+
+Flag: `-usb`  
+Used to specify that you'll be connecting over USB, skipping the selection
+
+Flag: `-wifi`  
+Used to specify that you'll be connecting over WiFi, skipping the selection
+
+Flag: `-mumu`  
+Used to specify that you'll be connecting to the MuMu emulator, skipping the selection
+
+Flag: `-bluestacks`  
+Used to specify that you'll be connecting to the BlueStacks emulator, skipping the selection  
+
+Flag: `-nopair`  
+Used to specify that you want to skip pairing your device for WiFi (useful if it's already paired)
+
+Flag: `-ip`  
+Usage: `-ip=IPAddress_and_Port`  
+Example: `-ip=192.168.1.5:40850`  
+Used to specify the IP you want to connect to for non-USB connections, skipping the input for it
+
+Flag: `-initialsetup`  
+Used to specify that you want to do the initial (I have the game installed but need to patch it) setup
+
+Flag: `-updatepatch`  
+Used to specify that you want to update the patch and/or change the language to the specified language
