@@ -37,6 +37,7 @@ namespace FFXIVMobile_Companion
         public static Random RandomNumber = new Random();
         public static Status RemoteStatus = new Status();
         public static bool SkipPairing = false;
+        public static bool DoInitialSetup = false;
 
         // Constants
         private const int STD_OUTPUT_HANDLE = -11;
@@ -90,6 +91,7 @@ namespace FFXIVMobile_Companion
             Console.ResetColor();
             WriteLine("Final Fantasy XIV Mobile Companion (Created by Aida Enna)");
             WriteLine("Source/Credits: " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
+            WriteLine("FFXIV Mobile EN Discord: " + Color.Blue + "https://discord.gg/ffxivmobile");
             var entryAssembly = Assembly.GetEntryAssembly();
             RemoteStatus = Functions.GetRemoteStatus();
             //https://umamusume.com/characters
@@ -152,7 +154,6 @@ namespace FFXIVMobile_Companion
                             default:
                                 WriteLine(Color.Red + "[ARGS] Invalid patch language specified: " + Language);
                                 break;
-
                         }
                         if (SelectedLanguage != GameLanguage.None) { WriteLine(Color.Magenta + "[ARGS] Patch language set to " + SelectedLanguage.LongName); }
                     }
@@ -186,9 +187,9 @@ namespace FFXIVMobile_Companion
                         ADB_IPAddress = argument.Replace("-ip=", "");
                         WriteLine(Color.Magenta + "[ARGS] ADB IP Address/Port set to " + ADB_IPAddress);
                     }
-                    if (argument.ToLower().Contains("-firstsetup"))
+                    if (argument.ToLower().Contains("-initialsetup"))
                     {
-                        SelectedLanguage = GameLanguage.InitialSetup;
+                        DoInitialSetup = true;
                         WriteLine(Color.Magenta + "[ARGS] Running initial patch setup");
                     }
                 }
@@ -262,38 +263,33 @@ namespace FFXIVMobile_Companion
             {
                 switch (SelectLanguage())
                 {
-                    case "0":
-                        File.AppendAllText("FFXIVMC.log", "User selected 0" + Environment.NewLine);
-                        SelectedLanguage = GameLanguage.InitialSetup;
-                        break;
-
                     case "1":
-                        File.AppendAllText("FFXIVMC.log", "User selected 1" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.English;
                         break;
 
                     case "2":
-                        File.AppendAllText("FFXIVMC.log", "User selected 2" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Japanese;
                         break;
 
                     case "3":
-                        File.AppendAllText("FFXIVMC.log", "User selected 3" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 3" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Korean;
                         break;
 
                     case "4":
-                        File.AppendAllText("FFXIVMC.log", "User selected 4" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 4" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.German;
                         break;
 
                     case "5":
-                        File.AppendAllText("FFXIVMC.log", "User selected 5" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 5" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.French;
                         break;
 
                     case "6":
-                        File.AppendAllText("FFXIVMC.log", "User selected 6" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 6" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Chinese;
                         break;
 
@@ -316,22 +312,22 @@ namespace FFXIVMobile_Companion
                 {
                     case "1":
                         SelectedConnectionType = ConnectionType.USB;
-                        File.AppendAllText("FFXIVMC.log", "User selected 1" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
                         break;
 
                     case "2":
                         SelectedConnectionType = ConnectionType.WiFi;
-                        File.AppendAllText("FFXIVMC.log", "User selected 2" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
                         break;
 
                     case "3":
                         SelectedConnectionType = ConnectionType.MuMu;
-                        File.AppendAllText("FFXIVMC.log", "User selected 3" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 3" + Environment.NewLine);
                         break;
 
                     case "4":
                         SelectedConnectionType = ConnectionType.BlueStacks;
-                        File.AppendAllText("FFXIVMC.log", "User selected 4" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 4" + Environment.NewLine);
                         break;
 
                     default:
@@ -365,7 +361,7 @@ namespace FFXIVMobile_Companion
                     WriteLine("Skipping pairing");
                 }
                 else
-                { 
+                {
                     WriteLine("1. Go to Settings -> About Phone -> Software Information");
                     WriteLine("2. Tap 'Build number' 7 times until you see 'Developer mode enabled'");
                     WriteLine("3. Return to Settings, go into Developer Options");
@@ -405,7 +401,7 @@ namespace FFXIVMobile_Companion
                         }
                         if (SelectedConnectionType == ConnectionType.MuMu)
                         {
-                            if (ConnectionAttempts > 5)
+                            if (ConnectionAttempts > 4)
                             {
                                 WriteLine(Color.Red + "Failed to connect to MuMu! Please restart the emulator and try again.");
                                 Close(false);
@@ -414,7 +410,7 @@ namespace FFXIVMobile_Companion
                         }
                         if (SelectedConnectionType == ConnectionType.BlueStacks)
                         {
-                            if (ConnectionAttempts > 5)
+                            if (ConnectionAttempts > 4)
                             {
                                 WriteLine(Color.Red + "Failed to connect to BlueStacks! Please restart the emulator and try again.");
                                 Close(false);
@@ -431,82 +427,16 @@ namespace FFXIVMobile_Companion
                     if (ConnectionResult.Contains("ERROR - "))
                     {
                         WriteLine(Color.Red + "Connection failed, please check your IP and port and try again! (Attempt " + ConnectionAttempts + "/5)");
+                        if (ConnectionAttempts > 4)
+                        {
+                            WriteLine(Color.Red + "Failed to connect to your device! Please restart your device and try again.");
+                            Close(false);
+                        }
                         continue;
                     }
                     ADBConnected = true;
                 }
                 while (ADBConnected == false);
-            }
-
-            /*
-            ███████ ██ ██████  ███████ ████████       ████████ ██ ███    ███ ███████     ███████ ███████ ████████ ██    ██ ██████
-            ██      ██ ██   ██ ██         ██             ██    ██ ████  ████ ██          ██      ██         ██    ██    ██ ██   ██
-            █████   ██ ██████  ███████    ██    █████    ██    ██ ██ ████ ██ █████       ███████ █████      ██    ██    ██ ██████
-            ██      ██ ██   ██      ██    ██             ██    ██ ██  ██  ██ ██               ██ ██         ██    ██    ██ ██
-            ██      ██ ██   ██ ███████    ██             ██    ██ ██      ██ ███████     ███████ ███████    ██     ██████  ██
-            */
-
-            if (SelectedLanguage == GameLanguage.InitialSetup)
-            {
-                WriteLine("In order to modify the game's files on a non-rooted device, we have to " + Color.Cyan + "delete the update data.");
-                WriteLine("This requires a final confirmation - Continuing will delete the update data, forcing you to redownload the game.");
-                WriteLine("Clearing this update data " + Color.Cyan + "will not delete your characters or saved game, " + Color.Default + "as those are saved on the server.");
-                WriteLine("If you'd like to start the initial setup (and wipe the update data), please type 'Yes' below.");
-                string Response = Console.ReadLine();
-                if (Response.ToLower() != "yes")
-                {
-                    WriteLine("You have selected not to continue with the initial setup. If you'd like to perform the initial setup later, simply open the program again.");
-                    Close();
-                }
-                WriteLine("Let's fucking goooo");
-
-                /*
-                echo [0mClearing local game data if it exists (an error here is OK!)[36m
-                adb\adb.exe -s %ip% shell pm clear com.tencent.tmgp.fmgame
-
-                echo [0mCreating folder for language change[36m
-                adb\adb.exe -s %ip% shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/
-                if "%errorlevel%"=="1" (
-                ECHO [31mFailed to create the folder, make sure your phone is connected and you followed all the steps![0m
-                ECHO [31mThe script will now exit. Please try again after fixing the above issue.[0m
-                PAUSE
-                EXIT /b
-                )
-
-                echo [0mCreating folder for language fix[36m
-                adb\adb.exe -s %ip% shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/
-                if "%errorlevel%"=="1" (
-                ECHO [31mFailed to create the folder, make sure your phone is connected and you followed all the steps![0m
-                ECHO [31mThe script will now exit. Please try again after fixing the above issue.[0m
-                PAUSE
-                EXIT /b
-                )
-
-                echo [0mDeleting INI file incase it exists (an error here is OK!)[36m
-                adb\adb.exe -s %ip% shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-
-                echo [0mCreating INI file with new language[36m
-                adb\adb.exe -s %ip% shell echo "[Internationalization]\\nCulture=%lang%" ">>" /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-                if "%errorlevel%"=="1" (
-                ECHO [31mFailed to create the INI file, make sure your phone is connected and you followed all the steps![0m
-                ECHO [31mThe script will now exit. Please try again after fixing the above issue.[0m
-                PAUSE
-                EXIT /b
-                )
-
-                echo [31mPlease open the FFXIV Mobile app and let it update/patch now.[0m
-                echo [31mOnce it is complete and you are at the login screen, close the game and hit enter to continue.[0m
-                pause
-
-                echo [0mRenaming PAK files to fix language issues[36m
-                adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak
-                if "%errorlevel%"=="1" (
-                ECHO [31mFailed to rename the PAK files, make sure you followed the directions and updated -before- hitting enter![0m
-                ECHO [31mThe script will now exit. Please try again after fixing the above issue.[0m
-                PAUSE
-                EXIT /b
-                )
-                */
             }
 
             /*
@@ -521,15 +451,21 @@ namespace FFXIVMobile_Companion
             {
                 switch (SelectTask())
                 {
+                    case "0":
+                        //Download/Fix the story patch
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 0" + Environment.NewLine);
+                        InitialSetup();
+                        break;
+
                     case "1":
                         //Change the language to the specified
-                        File.AppendAllText("FFXIVMC.log", "User selected 1" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
                         ChangeLanguage();
                         break;
 
                     case "2":
                         //Download/Fix the story patch
-                        File.AppendAllText("FFXIVMC.log", "User selected 2" + Environment.NewLine);
+                        File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
                         UpdateStoryPatch();
                         break;
 
@@ -553,15 +489,13 @@ namespace FFXIVMobile_Companion
                 WriteLine(SelectedLanguage.LongName + " selected");
                 return SelectedLanguage.ShortName;
             }
-            WriteLine(Color.Green + "Please select what language you would like your game in:");
+            WriteLine(Color.Green + "Please select what language you would like your game to be:");
             WriteLine("1. English (en)");
             WriteLine("2. Japanese (jp)");
             WriteLine("3. Korean (ko)");
             WriteLine("4. German (de)");
             WriteLine("5. French (fr)");
             WriteLine("6. Chinese (zh)");
-            WriteLine("\nIf you've just installed the game and are playing on a non-rooted device, you'll need to go through a one-time setup to enable other languages. If that's the case, please select one of the options below:");
-            WriteLine("0. Initial setup for " + Color.Blue + "non-rooted devices");
 
             Console.Write("\nType your choice: ");
             return Console.ReadKey().KeyChar.ToString();
@@ -593,6 +527,8 @@ namespace FFXIVMobile_Companion
             {
                 WriteLine(Color.Red + "A. [ADV] Non root UI swap");
             }
+            WriteLine("\n" + Color.Green + "If you've just installed the game and are playing on a non-rooted device" + Color.Default + ", you'll need to go through a one-time setup to change languages. If that's the case, please select one of the options below:");
+            WriteLine("0. Initial setup for " + Color.Blue + "non-rooted devices");
             Console.Write("\nType your choice: ");
             return Console.ReadKey().KeyChar.ToString();
         }
@@ -632,7 +568,7 @@ namespace FFXIVMobile_Companion
                 }
             }
             WriteLine("Opening game, enjoy!");
-            WriteLine(ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1"));
+            ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
             Close();
         }
 
@@ -677,13 +613,192 @@ namespace FFXIVMobile_Companion
 
             //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
             //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
-            ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
-            ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-            ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-            ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
+            WriteLine("Applying story patch");
+            string ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (pushing the DB) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            WriteLine("Story patch applied! The game will now open, enjoy!");
+            ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
+            Close();
+        }
 
-            WriteLine("Opening game, enjoy!");
-            WriteLine(ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1"));
+        public static void InitialSetup()
+        {
+            /*
+            ███████ ██ ██████  ███████ ████████       ████████ ██ ███    ███ ███████     ███████ ███████ ████████ ██    ██ ██████
+            ██      ██ ██   ██ ██         ██             ██    ██ ████  ████ ██          ██      ██         ██    ██    ██ ██   ██
+            █████   ██ ██████  ███████    ██    █████    ██    ██ ██ ████ ██ █████       ███████ █████      ██    ██    ██ ██████
+            ██      ██ ██   ██      ██    ██             ██    ██ ██  ██  ██ ██               ██ ██         ██    ██    ██ ██
+            ██      ██ ██   ██ ███████    ██             ██    ██ ██      ██ ███████     ███████ ███████    ██     ██████  ██
+            */
+            WriteLine(Environment.NewLine);
+            WriteLine("In order to modify the game's files on a non-rooted device, we have to " + Color.Yellow + "delete the update and config data.");
+            WriteLine("Continuing will delete the update data (and your settings), forcing you to redownload the game.");
+            WriteLine("Clearing this update data " + Color.Inverse + "will not delete your characters or progress" + Color.Default + ", as those are saved on the server.");
+            WriteLine("If you'd like to start the initial setup (and wipe the update data), please type 'Yes' below.");
+            string Response = Console.ReadLine();
+            if (Response.ToLower() != "yes")
+            {
+                WriteLine("You have selected not to continue. If you want to later, simply open the program again.");
+                Close();
+            }
+            WriteLine("Continuing with setup");
+            /*
+            echo [0mClearing local game data if it exists (an error here is OK!)[36m
+            adb\adb.exe -s %ip% shell pm clear com.tencent.tmgp.fmgame
+            */
+            WriteLine("Clearing local game data");
+            //WriteLine(ADB("shell pm clear com.tencent.tmgp.fmgame"));
+
+            //echo [0mCreating folder for language change[36m
+            //adb\adb.exe -s %ip% shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/
+            WriteLine("Creating folder for language change");
+            string ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to create the /Config/Android/ folder, make sure your phone is connected and you followed all the steps!");
+                Close(false);
+            }
+
+            WriteLine("Creating folder for language fix");
+            ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to create the /1.0.2.0/Dolphin/Paks/ folder, make sure your phone is connected and you followed all the steps!");
+                Close(false);
+            }
+
+            //echo [0mDeleting INI file incase it exists (an error here is OK!)[36m
+            //adb\adb.exe -s %ip% shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
+            if (ADBFileExist("/storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini"))
+            {
+                WriteLine("Deleting exiting config INI file");
+                WriteLine(ADB("rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini"));
+            }
+
+            string StringToWrite = @"[Internationalization]\\nCulture=" + SelectedLanguage.ShortName;
+            WriteLine("Changing language to " + Color.Blue + SelectedLanguage.LongName);
+            ADBResult = ADB("shell echo " + StringToWrite + " >> /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to create the INI file, make sure your phone is connected and you followed all the steps!");
+                Close(false);
+            }
+
+            string LocalDBHash = "";
+            if (File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+            {
+                LocalDBHash = Functions.CalculateMD5(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+            }
+
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")) || LocalDBHash != RemoteStatus.TranslationMD5)
+            {
+                WriteLine("Downloading the latest " + SelectedLanguage.LongName + " translations");
+                try
+                {
+                    Functions.DownloadFile("https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true", Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db"));
+                }
+                catch
+                {
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    Close(false);
+                }
+                if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "FDataBaseLoc.db")))
+                {
+                    WriteLine(Color.Red + "Failed to download Localization DB! Please download it from https://github.com/Aida-Enna/FFXIVM_Language_Selector/blob/main/other/FDataBaseLoc.db?raw=true and put it with this program.");
+                    Close(false);
+                }
+                WriteLine(Color.Green + "Translations downloaded successfully!");
+            }
+
+            //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
+            //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
+            WriteLine("Applying story patch");
+            ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (pushing the DB) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
+            }
+            WriteLine("Story patch applied!");
+            Write(Environment.NewLine);
+            WriteLine("The game will now open - Let it fully update and patch. Press enter once it is complete and you're at the login screen.");
+            WriteLine("The updater will be partially translated, but you " + Color.Yellow + "need to continue these steps" + Color.Default + " for your game to be in that language.");
+            WriteLine("If your updater is not in " + SelectedLanguage.LongName + ", please close the app and re-open it and let fully update and patch.");
+            if (SelectedConnectionType == ConnectionType.USB) { WriteLine(Color.Yellow + "Do not unplug your device from your computer."); }
+            if (SelectedConnectionType == ConnectionType.WiFi) { WriteLine(Color.Yellow + "Do not disconnect your phone from your WiFi."); }
+
+            ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
+
+            Console.ReadLine();
+            WriteLine("Press enter one more time just to be super sure that the game is fully updated and at the login screen");
+            Console.ReadLine();
+
+            WriteLine("Closing game and fixing language issues");
+            WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
+            WriteLine("Renaming PAK files to fix language issues");
+            //Let's wait 10 seconds just to be sure it's really closed
+            Thread.Sleep(10000);
+
+            ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak");
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to rename the PAK files, make sure you followed the directions and updated -before- hitting enter!");
+                Close(false);
+            }
+            WriteLine("All done! Your game should now be fully patched into " + Color.Blue + SelectedLanguage.LongName + ".");
+            ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
+            WriteLine("If you need to update the story patch later, re-open this app, select the language you want, select how you want to connect, then select 'Download/Update the story patch'.");
             Close();
         }
 
@@ -698,6 +813,7 @@ namespace FFXIVMobile_Companion
             else
             {
                 WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
+                WriteLine(Color.Yellow + "A log of what happened was saved to " + Path.Combine(Directory.GetCurrentDirectory(),"FFXIVMC.log"));
                 WriteLine(Color.Red + "Closing program in 20 seconds...");
                 Thread.Sleep(20000);
                 Environment.Exit(1);
@@ -744,7 +860,7 @@ namespace FFXIVMobile_Companion
                 ADBProcess.Start();
                 ADBProcess.WaitForExit();
                 string SuccessString = ADBProcess.StandardOutput.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
-                if (SuccessString.Contains("cannot connect"))
+                if (SuccessString.Contains("cannot connect") || SuccessString.Contains("cannot resolve"))
                 {
                     //ADB why? who hurt you?
                     return Color.Red + "ERROR - " + SuccessString;
@@ -752,6 +868,11 @@ namespace FFXIVMobile_Companion
                 if (string.IsNullOrWhiteSpace(SuccessString))
                 {
                     string ErrorString = ADBProcess.StandardError.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
+                    if (ErrorString.Contains("1 file pushed, 0 skipped"))
+                    {
+                        //ADB why? who hurt you?
+                        return Color.Cyan + SuccessString;
+                    }
                     if (string.IsNullOrWhiteSpace(ErrorString))
                     {
                         return "";

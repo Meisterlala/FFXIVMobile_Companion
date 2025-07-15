@@ -61,12 +61,14 @@ namespace FFXIVMobile_Companion
             if (splitValues.Length != 4)
             {
                 Console.WriteLine(Color.Red + "Please enter a valid IP address and port." + Color.Default);
+                Program.ADB_IPAddress = "1.2.3.4";
                 return false;
             }
 
             if (!IPAndPort.Contains(":")) 
             {
-                Console.WriteLine(Color.Red + "Please enter a valid IP address and port." + Color.Default); 
+                Console.WriteLine(Color.Red + "Please enter a valid IP address and port." + Color.Default);
+                Program.ADB_IPAddress = "1.2.3.4";
                 return false; 
             }
 

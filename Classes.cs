@@ -30,23 +30,9 @@ namespace FFXIVMobile_Companion
 
         /// <summary>Yellow, typically something that -may- be wrong or may not</summary>
         public const string Yellow = "\u001b[93m";
-    }
-
-    public static class Style
-    {
-        //List of styles here: https://i.imgur.com/v25JiRU.png
-
-        /// <summary>Bold</summary>
-        public const string Bold = "\u001b[1m";
 
         /// <summary>Inverse foreground <-> background</summary>
         public const string Inverse = "\u001b[7m";
-
-        /// <summary>Underline</summary>
-        public const string Underline = "\u001b[4m";
-
-        /// <summary>The default console style, typically used at the end of strings</summary>
-        public const string Default = "\u001b[0m";
     }
 
     public class ConnectionType
@@ -79,7 +65,6 @@ namespace FFXIVMobile_Companion
         public static GameLanguage French = new GameLanguage { LongName = "French", ShortName = "fr" };
         public static GameLanguage Chinese = new GameLanguage { LongName = "Chinese", ShortName = "zh" };
         public static GameLanguage None = new GameLanguage { LongName = "None", ShortName = "None" };
-        public static GameLanguage InitialSetup = new GameLanguage { LongName = "Initial Setup", ShortName = "Initial Setup" };
     };
 
     public struct Status
