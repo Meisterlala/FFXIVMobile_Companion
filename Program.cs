@@ -15,6 +15,7 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -95,21 +96,15 @@ namespace FFXIVMobile_Companion
             var entryAssembly = Assembly.GetEntryAssembly();
             RemoteStatus = Functions.GetRemoteStatus();
             //https://umamusume.com/characters
-            WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + RemoteStatus.Codename + "]");
-            //WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + Functions.TerminalURL(RemoteStatus.Codename, "https://umamusume.com/characters/" + RemoteStatus.Codename.ToLower().Replace(" ", "")) + "]");
+            WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + Functions.TerminalURL(RemoteStatus.Codename, "https://umamusume.com/characters/" + RemoteStatus.Codename.ToLower().Replace(" ", "")) + "]");
 
             /*
-            ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
-            ██    ██ ██   ██ ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
-            ██    ██ ██████  ██   ██ ███████    ██    █████       ██      ███████ █████   ██      █████
-            ██    ██ ██      ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
-             ██████  ██      ██████  ██   ██    ██    ███████      ██████ ██   ██ ███████  ██████ ██   ██
+             █████  ██████   ██████  ███████ 
+            ██   ██ ██   ██ ██       ██      
+            ███████ ██████  ██   ███ ███████ 
+            ██   ██ ██   ██ ██    ██      ██ 
+            ██   ██ ██   ██  ██████  ███████ 
             */
-            string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
-            if (File.Exists(entryAssembly.Location + ".bak"))
-            {
-                File.Delete(entryAssembly.Location + ".bak");
-            }
 
             if (args.Length > 0)
             {
@@ -195,7 +190,23 @@ namespace FFXIVMobile_Companion
                 }
                 File.AppendAllText("FFXIVMC.log", "Arguments: " + TotalArgs + Environment.NewLine);
             }
+            WriteLog("OS Description: " + RuntimeInformation.OSDescription);
+            WriteLog("Current Working Directory: " + Directory.GetCurrentDirectory());
 #if !DEBUG
+
+            /*
+            ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
+            ██    ██ ██   ██ ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
+            ██    ██ ██████  ██   ██ ███████    ██    █████       ██      ███████ █████   ██      █████
+            ██    ██ ██      ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
+             ██████  ██      ██████  ██   ██    ██    ███████      ██████ ██   ██ ███████  ██████ ██   ██
+            */
+            //string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
+            //if (File.Exists(entryAssembly.Location + ".bak"))
+            //{
+            //    File.Delete(entryAssembly.Location + ".bak");
+            //}
+
             //if (CurrentMD5 != RemoteStatus.ProgramMD5)
             //{
             //    try
@@ -220,6 +231,7 @@ namespace FFXIVMobile_Companion
             //    }
             //}
 #endif
+
             /*
              █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
             ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██
@@ -986,22 +998,16 @@ namespace FFXIVMobile_Companion
             return false;
         }
 
-        //Way too unreliable
-        //public static bool ADBFileExist(string Filename)
-        //{
-        //    string ADBFileExistString = ADB("ls " + Filename);
-        //    if (string.IsNullOrWhiteSpace(ADBFileExistString))
-        //    {
-        //        return false;
-        //    }
-        //    return true;
-        //}
-
         public static void WriteLine(string Text)
         {
             if (Text == "") { return; }
             File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
             Console.WriteLine(Text + Color.Default);
+        }
+
+        public static void WriteLog(string Text)
+        {
+            File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
         }
 
         public static void Write(string Text)
@@ -1011,27 +1017,27 @@ namespace FFXIVMobile_Companion
             Console.Write(Text + Color.Default);
         }
 
-        // usage: WriteColor("This is my [message] with inline [color] changes.", ConsoleColor.Yellow);
-        private static void WriteColor(string message, ConsoleColor color)
-        {
-            var pieces = Regex.Split(message, @"(\[[^\]]*\])");
+        //// usage: WriteColor("This is my [message] with inline [color] changes.", ConsoleColor.Yellow);
+        //private static void WriteColor(string message, ConsoleColor color)
+        //{
+        //    var pieces = Regex.Split(message, @"(\[[^\]]*\])");
 
-            for (int i = 0; i < pieces.Length; i++)
-            {
-                string piece = pieces[i];
+        //    for (int i = 0; i < pieces.Length; i++)
+        //    {
+        //        string piece = pieces[i];
 
-                if (piece.StartsWith("[") && piece.EndsWith("]"))
-                {
-                    Console.ForegroundColor = color;
-                    piece = piece.Substring(1, piece.Length - 2);
-                }
+        //        if (piece.StartsWith("[") && piece.EndsWith("]"))
+        //        {
+        //            Console.ForegroundColor = color;
+        //            piece = piece.Substring(1, piece.Length - 2);
+        //        }
 
-                Console.Write(piece);
-                Console.ResetColor();
-            }
+        //        Console.Write(piece);
+        //        Console.ResetColor();
+        //    }
 
-            Console.WriteLine();
-        }
+        //    Console.WriteLine();
+        //}
 
         public static string Random()
         {

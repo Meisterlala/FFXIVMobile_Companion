@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -20,8 +21,8 @@ namespace FFXIVMobile_Companion
         public static void DownloadFile(string address, string filename)
         {
             var cURL_Process = new Process();
-            var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output " + filename);
-            Console.WriteLine("cURL arguments: " + "/C curl -L " + address + " --output " + filename);
+            var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output \"" + filename + "\"");
+            Console.WriteLine("cURL arguments: " + "/C curl -L " + address + " --output \"" + filename + "\"");
             cURL_StartInfo.UseShellExecute = true;
             cURL_StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             cURL_Process.StartInfo = cURL_StartInfo;
