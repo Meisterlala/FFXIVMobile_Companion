@@ -22,9 +22,14 @@ A reminder that you should **never** install or open WeChat on your emulator, yo
 
 ## Usage
 
-Open the file you downloaded and follow the directions - it's that easy!  
-If you get a warning from Windows Smartscreen select `Run anyway` - [You can check out a virus scan of the exe here](https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1)  
-(or copy the URL and test it yourself)
+1. Open the file you downloaded - If you get a warning from Windows Smart Screen select `Run anyway` - [You can check out a virus scan of the exe here](<https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1>) or copy the URL and test it yourself
+2. Select the language you want your game to be in
+3. Select how you want to connect to your device
+4. Select what you want to do:
+
+- If you don't have the game installed, you can select to install it (option A)
+- If you have the game installed but haven't done any modifications to make it into other languages yet, you'll need to do the Initial Setup (option 0)
+- If you just want to change the language or update the story patch, you can do that (Option 1)
 
 ## Known Issues
 
