@@ -35,11 +35,6 @@ If you get a warning from Windows Smartscreen select `Run anyway` - [You can che
 
 Make sure to read all directions carefully. If you still can't get it to work, you can [join our discord](http://discord.gg/ffxivmobile) to get help.
 
-## Credits:
-Aida-Enna (Discording the original translation files and finding the exploit to load them and change the language/creating the original program/creating this new rewritten program)
-Thaun (writing the original instructions to do this over ADB)
-Deiki (For finding out the game won't touch files that are set to read-only)
-
 ## Donate
 If you'd like to donate/support what I do, please check out the following:
 
@@ -50,6 +45,11 @@ If you'd like to donate/support what I do, please check out the following:
 [Patreon](https://www.patreon.com/PSO2)
 
 Thank you very much, every bit helps!
+
+## Credits:
+Aida-Enna (Discovering the original translation files and finding the exploit to load them and change the language/creating the original program/creating this new rewritten program)
+Thaun (writing the original instructions to do this over ADB)
+Deiki (For finding out the game won't touch files that are set to read-only)
 
 ## Advanced Usage
 
