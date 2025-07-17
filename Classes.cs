@@ -69,14 +69,20 @@ namespace FFXIVMobile_Companion
 
     public struct Status
     {
+        [JsonPropertyName("Disabled")]
+        public bool Disabled { get; set; }
+
+        [JsonPropertyName("UpdatingEnabled")]
+        public bool UpdatingEnabled { get; set; }
+
         [JsonPropertyName("ProgramMD5")]
         public string ProgramMD5 { get; set; }
 
-        [JsonPropertyName("TranslationMD5")]
-        public string TranslationMD5 { get; set; }
-
         [JsonPropertyName("ProgramUpdateURL")]
         public string ProgramUpdateURL { get; set; }
+
+        [JsonPropertyName("TranslationMD5")]
+        public string TranslationMD5 { get; set; }
 
         [JsonPropertyName("TranslationUpdateURL")]
         public string TranslationUpdateURL { get; set; }
@@ -84,14 +90,21 @@ namespace FFXIVMobile_Companion
         [JsonPropertyName("FFXIVM_APKURL")]
         public string FFXIVM_APKURL { get; set; }
 
-        [JsonPropertyName("BuildDate")]
-        public string BuildDate { get; set; }
-        
-        [JsonPropertyName("Codename")]
-        public string Codename { get; set; }
-
         [JsonPropertyName("BadFiles")]
         public List<string> BadFiles { get; set; }
+
+        [JsonPropertyName("MessageEnabled")]
+        public bool MessageEnabled { get; set; }
+
+        [JsonPropertyName("Message")]
+        public string Message { get; set; }
+
+        [JsonPropertyName("MessageColor")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ConsoleColor MessageColor { get; set; }
+
+        [JsonPropertyName("MessageTimeout")]
+        public int MessageTimeout { get; set; }
     };
 
     public class MyWebClient : WebClient

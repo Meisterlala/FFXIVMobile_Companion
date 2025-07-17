@@ -14,8 +14,8 @@ conflicts, and that would be a very sad thing. - Aeolia Schenberg, 2091 A.D.
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -28,7 +28,6 @@ namespace FFXIVMobile_Companion
 {
     internal class Program
     {
-        public static string BuildDate;
         public static bool AdvancedMode = false;
         public static GameLanguage SelectedLanguage = GameLanguage.None;
         public static string SelectedConnectionType = ConnectionType.None;
@@ -39,6 +38,8 @@ namespace FFXIVMobile_Companion
         public static Status RemoteStatus = new Status();
         public static bool SkipPairing = false;
         public static bool DoInitialSetup = false;
+        public static string LogFile = Path.Combine(Directory.GetCurrentDirectory(), "FFXIVMC_log.txt");
+        public static string InfoDumpFile = Path.Combine(Directory.GetCurrentDirectory(), "FFXIVMC_infodump.txt");
 
         // Constants
         private const int STD_OUTPUT_HANDLE = -11;
@@ -73,7 +74,7 @@ namespace FFXIVMobile_Companion
                 return;
             }
 
-            if (File.Exists("FFXIVMC.log")) { File.Delete("FFXIVMC.log"); }
+            if (File.Exists(LogFile)) { File.Delete(LogFile); }
             /*TODO:
             - Add LDPlayer support
             - Implement a check system for program updates/language updates using a remote JSON
@@ -96,7 +97,7 @@ namespace FFXIVMobile_Companion
             var entryAssembly = Assembly.GetEntryAssembly();
             RemoteStatus = Functions.GetRemoteStatus();
             //https://umamusume.com/characters
-            WriteLine(Color.Yellow + $"[Built on " + RemoteStatus.BuildDate + " | Codename: " + Functions.TerminalURL(RemoteStatus.Codename, "https://umamusume.com/characters/" + RemoteStatus.Codename.ToLower().Replace(" ", "")) + "]");
+            WriteLine(Color.Yellow + $"[Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString() + " built on " + Properties.Resources.BuildDate.Replace(Environment.NewLine, "") + "]");
 
             /*
              █████  ██████   ██████  ███████
@@ -188,11 +189,11 @@ namespace FFXIVMobile_Companion
                         WriteLine(Color.Magenta + "[ARGS] Running initial patch setup");
                     }
                 }
-                File.AppendAllText("FFXIVMC.log", "Arguments: " + TotalArgs + Environment.NewLine);
+                File.AppendAllText(LogFile, "Arguments: " + TotalArgs + Environment.NewLine);
             }
-            WriteLog("OS Description: " + RuntimeInformation.OSDescription);
+            WriteLog("OS: " + RuntimeInformation.OSDescription);
             WriteLog("Current Working Directory: " + Directory.GetCurrentDirectory());
-#if !DEBUG
+            //#if !DEBUG
 
             /*
             ██    ██ ██████  ██████   █████  ████████ ███████      ██████ ██   ██ ███████  ██████ ██   ██
@@ -201,37 +202,92 @@ namespace FFXIVMobile_Companion
             ██    ██ ██      ██   ██ ██   ██    ██    ██          ██      ██   ██ ██      ██      ██  ██
              ██████  ██      ██████  ██   ██    ██    ███████      ██████ ██   ██ ███████  ██████ ██   ██
             */
-            //string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
-            //if (File.Exists(entryAssembly.Location + ".bak"))
-            //{
-            //    File.Delete(entryAssembly.Location + ".bak");
-            //}
+            string CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
 
-            //if (CurrentMD5 != RemoteStatus.ProgramMD5)
-            //{
-            //    try
-            //    {
-            //        WriteLine("A new version is available, downloading now...");
-            //        File.Move(entryAssembly.Location, entryAssembly.Location + ".bak");
-            //        Functions.DownloadFileFallback(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
-            //        CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
-            //        if (CurrentMD5 != RemoteStatus.ProgramMD5)
-            //        {
-            //            WriteLine(Color.Red + "Updating failed! Please download the latest version at " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
-            //        }
-            //        else
-            //        {
-            //            Process.Start(entryAssembly.Location); // to start new instance of application
-            //            Environment.Exit(0);
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        WriteLine(Color.Red + "Updating failed! Please download the latest version at " + Color.Blue + "https://github.com/Aida-Enna/FFXIVMobile_Companion");
-            //    }
-            //}
-#endif
+            if (File.Exists(entryAssembly.Location + ".bak"))
+            {
+                File.Delete(entryAssembly.Location + ".bak");
+            }
 
+            var hasMessage = !string.IsNullOrEmpty(RemoteStatus.Message);
+
+            var previousColor = Console.ForegroundColor;
+
+            if (RemoteStatus.MessageEnabled && hasMessage)
+            {
+                Console.ForegroundColor = RemoteStatus.MessageColor;
+                Console.WriteLine("{0}", RemoteStatus.Message);
+            }
+
+            if (RemoteStatus.Disabled)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("This program is currently disabled remotely by the creator (Aida Enna). Please wait until a fix is live, at which point the program will auto-update and begin working again. Sorry!");
+                Console.WriteLine("Press the enter key to exit.");
+                Console.ReadLine();
+                Console.ForegroundColor = previousColor;
+                Environment.Exit(0);
+            }
+
+            if (RemoteStatus.MessageEnabled)
+            {
+                for (int countdown = RemoteStatus.MessageTimeout; countdown > 0; countdown--)
+                {
+                    Console.Write("\rContinuing in {0} second(s)...   ", countdown);
+                    Thread.Sleep(1000);
+                }
+                Console.WriteLine("\rContinuing in 0 seconds...   ");
+            }
+
+            Console.ForegroundColor = previousColor;
+
+            if (RemoteStatus.UpdatingEnabled)
+            {
+                WriteLog("Checking for program updates...");
+                if (CurrentMD5 != RemoteStatus.ProgramMD5)
+                {
+                    try
+                    {
+                        WriteLine("A new version is available, downloading now...");
+                        int UpdateAttempts = 0;
+                        if (File.Exists("update_attempts.txt"))
+                        {
+                            UpdateAttempts = Convert.ToInt32(File.ReadAllText("update_attempts.txt"));
+                        }
+                        UpdateAttempts++;
+                        File.WriteAllText("update_attempts.txt", UpdateAttempts.ToString());
+                        if (UpdateAttempts > 5)
+                        {
+                            WriteLine(Color.Red + "Updating has failed 5+ times in a row and will not be attempted again until the next time you open the program.\nPlease download the latest version from " + Color.Blue + RemoteStatus.ProgramUpdateURL);
+                        }
+                        else
+                        {
+                            File.Move(entryAssembly.Location, entryAssembly.Location + ".bak");
+                            Functions.DownloadFileFallback(RemoteStatus.ProgramUpdateURL, "FFXIVMobile_Companion.exe");
+                            CurrentMD5 = Functions.CalculateMD5(entryAssembly.Location);
+                            if (CurrentMD5 != RemoteStatus.ProgramMD5)
+                            {
+                                WriteLine(Color.Red + "Updating failed! Please download the latest version from " + Color.Blue + RemoteStatus.ProgramUpdateURL);
+                            }
+                            else
+                            {
+                                Process.Start(entryAssembly.Location); // to start new instance of application
+                                Environment.Exit(0);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        WriteLine(Color.Red + "Updating failed! Please download the latest version from " + Color.Blue + RemoteStatus.ProgramUpdateURL);
+                    }
+                }
+            }
+            else
+            {
+                WriteLog(Color.Yellow + "Auto-updating is currently disabled remotely by the creator (Aida Enna). The program will attempt to update once it is re-enabled remotely.");
+            }
+            //#endif
+            File.WriteAllText("update_attempts.txt", "0");
             /*
              █████  ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
             ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██
@@ -283,32 +339,32 @@ namespace FFXIVMobile_Companion
                 switch (SelectLanguage())
                 {
                     case "1":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 1" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.English;
                         break;
 
                     case "2":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 2" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Japanese;
                         break;
 
                     case "3":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 3" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 3" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Korean;
                         break;
 
                     case "4":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 4" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 4" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.German;
                         break;
 
                     case "5":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 5" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 5" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.French;
                         break;
 
                     case "6":
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 6" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 6" + Environment.NewLine);
                         SelectedLanguage = GameLanguage.Chinese;
                         break;
 
@@ -331,22 +387,22 @@ namespace FFXIVMobile_Companion
                 {
                     case "1":
                         SelectedConnectionType = ConnectionType.USB;
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 1" + Environment.NewLine);
                         break;
 
                     case "2":
                         SelectedConnectionType = ConnectionType.WiFi;
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 2" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 2" + Environment.NewLine);
                         break;
 
                     case "3":
                         SelectedConnectionType = ConnectionType.MuMu;
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 3" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 3" + Environment.NewLine);
                         break;
 
                     case "4":
                         SelectedConnectionType = ConnectionType.BlueStacks;
-                        File.AppendAllText("FFXIVMC.log", "-> User selected 4" + Environment.NewLine);
+                        File.AppendAllText(LogFile, "-> User selected 4" + Environment.NewLine);
                         break;
 
                     default:
@@ -449,7 +505,7 @@ namespace FFXIVMobile_Companion
                     }
                     string ConnectionResult = ADB("connect " + ADB_IPAddress, true);
                     WriteLine(ConnectionResult);
-                    if (ConnectionResult.Contains("ERROR - "))
+                    if (ConnectionResult.Contains("ERROR - ") || ConnectionResult.ToLower().Contains("failed"))
                     {
                         WriteLine(Color.Red + "Connection failed, please check your IP and port and try again! (Attempt " + ConnectionAttempts + "/5)");
                         if (ConnectionAttempts > 4)
@@ -484,14 +540,26 @@ namespace FFXIVMobile_Companion
                     {
                         case "0":
                             //Download/Fix the story patch
-                            File.AppendAllText("FFXIVMC.log", "-> User selected 0" + Environment.NewLine);
+                            File.AppendAllText(LogFile, "-> User selected 0" + Environment.NewLine);
                             InitialSetup();
                             break;
 
                         case "1":
                             //Change the language to the specified
-                            File.AppendAllText("FFXIVMC.log", "-> User selected 1" + Environment.NewLine);
+                            File.AppendAllText(LogFile, "-> User selected 1" + Environment.NewLine);
                             ChangeLanguage();
+                            break;
+
+                        case "2":
+                            File.AppendAllText(LogFile, "-> User selected 2" + Environment.NewLine);
+                            FixPermissions();
+                            Close();
+                            break;
+
+                        case "L":
+                        case "l":
+                            File.AppendAllText(LogFile, "-> User selected L" + Environment.NewLine);
+                            LogInfo();
                             break;
 
                         case "A":
@@ -548,9 +616,10 @@ namespace FFXIVMobile_Companion
         {
             WriteLine(Color.Green + "What do you want to do?");
             WriteLine("1. Change language to " + SelectedLanguage.LongName + " and/or install/update the story patch");
+            WriteLine("2. Fix game permissions (Fix error 70254604/Updater reverting language/Updater locking up)");
             if (AdvancedMode)
             {
-                WriteLine(Color.Red + "A. [ADV] Non root UI swap");
+                //WriteLine(Color.Red + "A. [ADV] Non root UI swap");
             }
             WriteLine("\n" + Color.Yellow + "If you've just installed the game on a non-rooted device" + Color.Default + ", you need to go through a one-time setup to change languages.");
             WriteLine("If that's the case, please select one of the options below:");
@@ -559,6 +628,9 @@ namespace FFXIVMobile_Companion
             WriteLine("\n" + Color.Yellow + "If you haven't installed the game yet" + Color.Default + ", you can select the following option to download/install it for you:");
             WriteLine("A. Download/Install FFXIV Mobile");
 
+            WriteLine("\n" + Color.Yellow + "Troubleshooting:");
+            WriteLine("L. Generate a file full of information so people in the discord can try to help you");
+
             Console.Write("\nType your choice: ");
             return Console.ReadKey().KeyChar.ToString();
         }
@@ -566,10 +638,6 @@ namespace FFXIVMobile_Companion
         public static void ChangeLanguage()
         {
             WriteLine(Environment.NewLine);
-            /*
-            adb\adb.exe -s %ip% shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-	        adb\adb.exe -s %ip% shell echo "[Internationalization]\\nCulture=%lang%" ">>" /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
-            */
 
             if (IsGameOpen())
             {
@@ -581,6 +649,7 @@ namespace FFXIVMobile_Companion
             WriteLine(ADB("shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini", SilenceOutput: true));
 
             string StringToWrite = @"[Internationalization]\\nCulture=" + SelectedLanguage.ShortName;
+
             WriteLine("Changing language to " + SelectedLanguage.LongName);
             string ADBResult = ADB("shell echo " + StringToWrite + " >> /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini");
             WriteLine(ADBResult);
@@ -592,16 +661,6 @@ namespace FFXIVMobile_Companion
 
             CheckForStoryPatchUpdates();
 
-            //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
-            //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
-            WriteLine("Applying story patch");
-            ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
-            WriteLine(ADBResult);
-            if (ADBResult.Contains("ERROR - "))
-            {
-                WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
-                Close(false);
-            }
             ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
@@ -609,18 +668,12 @@ namespace FFXIVMobile_Companion
                 WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
                 Close(false);
             }
+
             ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
             {
                 WriteLine(Color.Red + "Failed to apply the story patch (pushing the DB) - Is your game set up correctly? Please do the initial set up if not.");
-                Close(false);
-            }
-            ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
-            WriteLine(ADBResult);
-            if (ADBResult.Contains("ERROR - "))
-            {
-                WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
                 Close(false);
             }
 
@@ -639,6 +692,17 @@ namespace FFXIVMobile_Companion
                 {
                     if (ADBResult.Contains("No such file or directory") == false) { WriteLine(ADBResult); }
                 }
+            }
+
+            //FixPermissions();
+
+            ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
+
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
+                Close(false);
             }
 
             WriteLine("Opening game, enjoy!");
@@ -672,15 +736,10 @@ namespace FFXIVMobile_Companion
                 WriteLine("Closing game");
                 WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
             }
-            /*
-            echo [0mClearing local game data if it exists (an error here is OK!)[36m
-            adb\adb.exe -s %ip% shell pm clear com.tencent.tmgp.fmgame
-            */
+
             WriteLine("Clearing local game data");
             WriteLine(ADB("shell pm clear com.tencent.tmgp.fmgame"));
 
-            //echo [0mCreating folder for language change[36m
-            //adb\adb.exe -s %ip% shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/
             WriteLine("Creating folder for language change");
             string ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/");
             WriteLine(ADBResult);
@@ -708,8 +767,6 @@ namespace FFXIVMobile_Companion
                 Close(false);
             }
 
-            //echo [0mDeleting INI file incase it exists (an error here is OK!)[36m
-            //adb\adb.exe -s %ip% shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini
             WriteLine("Deleting exiting config INI file (if it exists)");
             WriteLine(ADB("shell rm /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/GameUserSettings.ini", SilenceOutput: true));
 
@@ -725,23 +782,7 @@ namespace FFXIVMobile_Companion
 
             CheckForStoryPatchUpdates();
 
-            //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_orig
-            //adb\adb.exe -s %ip% shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database
             WriteLine("Applying story patch");
-            //ADBResult = ADB("shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database_" + Random());
-            //WriteLine(ADBResult);
-            //if (ADBResult.Contains("ERROR - "))
-            //{
-            //    WriteLine(Color.Red + "Failed to apply the story patch (folder moving) - Is your game set up correctly? Please do the initial set up if not.");
-            //    Close(false);
-            //}
-            //ADBResult = ADB("shell mkdir /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
-            //WriteLine(ADBResult);
-            //if (ADBResult.Contains("ERROR - "))
-            //{
-            //    WriteLine(Color.Red + "Failed to apply the story patch (making the directory) - Is your game set up correctly? Please do the initial set up if not.");
-            //    Close(false);
-            //}
             ADBResult = ADB("push FDataBaseLoc.db /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
@@ -749,6 +790,11 @@ namespace FFXIVMobile_Companion
                 WriteLine(Color.Red + "Failed to apply the story patch (pushing the DB) - Is your game set up correctly? Please do the initial set up if not.");
                 Close(false);
             }
+
+            WriteLine("Story patch applied!");
+
+            //FixPermissions();
+
             ADBResult = ADB("shell chmod -w /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/Database/FDataBaseLoc.db");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
@@ -756,13 +802,14 @@ namespace FFXIVMobile_Companion
                 WriteLine(Color.Red + "Failed to apply the story patch (chmod read only) - Is your game set up correctly? Please do the initial set up if not.");
                 Close(false);
             }
-            WriteLine("Story patch applied!");
+
             Write(Environment.NewLine);
+
             WriteLine("The game will now open - Let it fully update and patch. Press enter once it is complete and you're at the login screen.");
             WriteLine("The updater will be partially translated, but you " + Color.Yellow + "need to continue these steps" + Color.Default + " for your game to be in that language.");
             WriteLine("If your updater is not in " + SelectedLanguage.LongName + ", please close the app and re-open it and let fully update and patch.");
-            if (SelectedConnectionType == ConnectionType.USB) { WriteLine(Color.Yellow + "Do not unplug your device from your computer."); }
-            if (SelectedConnectionType == ConnectionType.WiFi) { WriteLine(Color.Yellow + "Do not disconnect your phone from your WiFi."); }
+            if (SelectedConnectionType == ConnectionType.USB) { WriteLine(Color.Yellow + "Do not unplug your device from your computer or lock your device."); }
+            if (SelectedConnectionType == ConnectionType.WiFi) { WriteLine(Color.Yellow + "Do not disconnect your phone from your WiFi or lock your device."); }
 
             ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
 
@@ -791,10 +838,31 @@ namespace FFXIVMobile_Companion
                     if (ADBResult.Contains("No such file or directory") == false) { WriteLine(ADBResult); }
                 }
             }
+
             WriteLine("All done! Your game should now be fully patched into " + Color.Blue + SelectedLanguage.LongName + ".");
             ADB("shell monkey -p com.tencent.tmgp.fmgame 1 >/dev/null 2>&1");
             WriteLine("If you need to update the story patch later, re-open this app, select the language you want, select how you want to connect, then select 'Download/Update the story patch'.");
             Close();
+        }
+
+        public static void FixPermissions()
+        {
+            if (IsGameOpen())
+            {
+                WriteLine("Closing game");
+                WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
+            }
+            WriteLine("Fixing permissions");
+            string ADBResult = ADB("shell chmod -R 777 /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/");
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to change permissions on the folder - Please try this initial setup again!");
+                Close(false);
+            }
+            else
+            {
+                WriteLine(ADBResult);
+            }
         }
 
         public static void InstallGame()
@@ -833,6 +901,63 @@ namespace FFXIVMobile_Companion
             Close();
         }
 
+        public static void LogInfo()
+        {
+            Write(Environment.NewLine);
+            WriteLine("Generating log, please wait...");
+            File.WriteAllText(InfoDumpFile, "---Log Dump created on " + DateTime.UtcNow.ToString("G") + " (UTC)---" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "Selected Language: " + SelectedLanguage.LongName + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "Connection Type: " + SelectedConnectionType + Environment.NewLine);
+            if (SelectedConnectionType == ConnectionType.WiFi) { File.AppendAllText(InfoDumpFile, "ADB IP Address: " + ADB_IPAddress + Environment.NewLine); }
+            List<string> ValuesToCheck = new List<string>
+            {
+                "Model|model",
+                "Manufacturer|ro.product.manufacturer",
+                "Market name|ro.product.cpu.marketname",
+                "Brand|ro.product.odm.brand",
+                "CPU|ro.product.cpu.abi",
+                "Language|language",
+                "Timezone|persist.sys.timezone",
+                "Locale|persist.sys.locale",
+                "Hardware|ro.boot.hardware",
+                "Android version|ro.build.version.release",
+                "Android codename|ro.build.version.codename"
+            };
+            foreach (string DescriptionAndValue in ValuesToCheck)
+            {
+                string Description = DescriptionAndValue.Split('|')[0];
+                string Value = DescriptionAndValue.Split('|')[1];
+                string ADBValue = ADB("shell getprop | grep " + Value, NoColors: true);
+                if (!string.IsNullOrWhiteSpace(ADBValue))
+                {
+                    File.AppendAllText(InfoDumpFile, Environment.NewLine + "-" + Description + "-" + Environment.NewLine + ADBValue + Environment.NewLine);
+                }
+            }
+
+            if (ADB("shell getprop | grep .miui.", NoColors: true).Length > 0)
+            {
+                File.AppendAllText(InfoDumpFile, Environment.NewLine + "!WARNING: Miui phone detected!" + Environment.NewLine);
+            }
+            File.AppendAllText(InfoDumpFile, Environment.NewLine + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "    ██ ███████ ██ ██      ███████ ███████     ████████ ██████  ███████ ███████" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "   ██  ██      ██ ██      ██      ██             ██    ██   ██ ██      ██     " + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "  ██   █████   ██ ██      █████   ███████        ██    ██████  █████   █████  " + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, " ██    ██      ██ ██      ██           ██        ██    ██   ██ ██      ██     " + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "██     ██      ██ ███████ ███████ ███████        ██    ██   ██ ███████ ███████" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, ADB("shell find \"/storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/ -print | sort | sed 's;[^/]*/;|---;g;s;---|; |;g'\"", NoColors: true) + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "    ██ ███████ ██ ██      ███████ ███████     ██████  ███████ ██████  ███    ███ ███████" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "   ██  ██      ██ ██      ██      ██          ██   ██ ██      ██   ██ ████  ████ ██     " + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "  ██   █████   ██ ██      █████   ███████     ██████  █████   ██████  ██ ████ ██ ███████" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, " ██    ██      ██ ██      ██           ██     ██      ██      ██   ██ ██  ██  ██      ██" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, "██     ██      ██ ███████ ███████ ███████     ██      ███████ ██   ██ ██      ██ ███████" + Environment.NewLine);
+            File.AppendAllText(InfoDumpFile, ADB("shell ls -l -R /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/", NoColors: true) + Environment.NewLine);
+            WriteLine("Log dump complete, please upload the " + Color.Yellow + Functions.TerminalURL(InfoDumpFile, "file://" + Path.Combine(Directory.GetCurrentDirectory(), InfoDumpFile)) + Color.Default + " file to the discord's help channel.");
+            WriteLine("Press enter to return to the task menu.");
+            Console.ReadLine();
+            Write(Environment.NewLine);
+        }
+
         public static void Close(bool Success = true)
         {
             //Terminate ADB stuff
@@ -847,14 +972,14 @@ namespace FFXIVMobile_Companion
             else
             {
                 WriteLine(Color.Red + "The program will now exit. Please try again after fixing the above issue.");
-                WriteLine(Color.Yellow + "A log of what happened was saved to " + Path.Combine(Directory.GetCurrentDirectory(), "FFXIVMC.log"));
+                WriteLine(Color.Yellow + "A log of what happened was saved to " + Path.Combine(Directory.GetCurrentDirectory(), LogFile));
                 WriteLine(Color.Red + "Closing program in 20 seconds...");
                 Thread.Sleep(20000);
                 Environment.Exit(1);
             }
         }
 
-        public static string ADB(string Command, bool RawCommand = false, bool SilenceOutput = false)
+        public static string ADB(string Command, bool RawCommand = false, bool SilenceOutput = false, bool NoColors = false)
         {
             try
             {
@@ -892,12 +1017,19 @@ namespace FFXIVMobile_Companion
                     }
                 };
                 ADBProcess.Start();
-                ADBProcess.WaitForExit();
                 string SuccessString = ADBProcess.StandardOutput.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
+                ADBProcess.WaitForExit();
                 if (SuccessString.Contains("cannot connect") || SuccessString.Contains("cannot resolve"))
                 {
                     //ADB why? who hurt you?
-                    return Color.Red + "ERROR - " + SuccessString;
+                    if (NoColors)
+                    {
+                        return "ERROR - " + SuccessString;
+                    }
+                    else
+                    {
+                        return Color.Red + "ERROR - " + SuccessString;
+                    }
                 }
                 if (string.IsNullOrWhiteSpace(SuccessString))
                 {
@@ -905,7 +1037,14 @@ namespace FFXIVMobile_Companion
                     if (ErrorString.Contains("1 file pushed, 0 skipped"))
                     {
                         //ADB why? who hurt you?
-                        return Color.Cyan + SuccessString;
+                        if (NoColors)
+                        {
+                            return SuccessString;
+                        }
+                        else
+                        {
+                            return Color.Cyan + SuccessString;
+                        }
                     }
                     if (string.IsNullOrWhiteSpace(ErrorString))
                     {
@@ -913,12 +1052,26 @@ namespace FFXIVMobile_Companion
                     }
                     else
                     {
-                        return Color.Red + "ERROR - " + ErrorString;
+                        if (NoColors)
+                        {
+                            return "ERROR - " + ErrorString;
+                        }
+                        else
+                        {
+                            return Color.Red + "ERROR - " + ErrorString;
+                        }
                     }
                 }
                 else
                 {
-                    return Color.Cyan + SuccessString;
+                    if (NoColors)
+                    {
+                        return SuccessString;
+                    }
+                    else
+                    {
+                        return Color.Cyan + SuccessString;
+                    }
                 }
             }
             catch (Exception ex)
@@ -981,43 +1134,21 @@ namespace FFXIVMobile_Companion
         public static void WriteLine(string Text)
         {
             if (Text == "") { return; }
-            File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
+            File.AppendAllText(LogFile, Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
             Console.WriteLine(Text + Color.Default);
         }
 
         public static void WriteLog(string Text)
         {
-            File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
+            File.AppendAllText(LogFile, Regex.Replace(Text, @"\[.*?m", "") + Environment.NewLine);
         }
 
         public static void Write(string Text)
         {
             if (Text == "") { return; }
-            File.AppendAllText("FFXIVMC.log", Regex.Replace(Text, @"\[.*?m", ""));
+            File.AppendAllText(LogFile, Regex.Replace(Text, @"\[.*?m", ""));
             Console.Write(Text + Color.Default);
         }
-
-        //// usage: WriteColor("This is my [message] with inline [color] changes.", ConsoleColor.Yellow);
-        //private static void WriteColor(string message, ConsoleColor color)
-        //{
-        //    var pieces = Regex.Split(message, @"(\[[^\]]*\])");
-
-        //    for (int i = 0; i < pieces.Length; i++)
-        //    {
-        //        string piece = pieces[i];
-
-        //        if (piece.StartsWith("[") && piece.EndsWith("]"))
-        //        {
-        //            Console.ForegroundColor = color;
-        //            piece = piece.Substring(1, piece.Length - 2);
-        //        }
-
-        //        Console.Write(piece);
-        //        Console.ResetColor();
-        //    }
-
-        //    Console.WriteLine();
-        //}
 
         public static string Random()
         {

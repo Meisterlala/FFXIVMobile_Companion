@@ -70,6 +70,17 @@ namespace FFXIVMobile_Companion
                     data = client.DownloadString("http://aida.moe/ffxiv_mobile/status.json");
                 }
 
+                try
+                {
+                    JsonDocument.Parse(data);
+                }
+                catch (JsonException)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Failed to parse the remote status file - this probably means Aida broke something and will fix it soon!");
+                    return new Status();
+                }
+
                 var options = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true,
