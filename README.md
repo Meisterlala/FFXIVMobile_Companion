@@ -16,7 +16,7 @@ Make sure you've enabled ADB in Bluestacks too (Settings -> Advanced -> turn on 
 ## Before You Start
 - If you do not have the game installed, you can download and install it through this program
 - If you have the game installed but not patched, you can patch it through this program to change languages to whatever you want
-- If you want to update your translations or fix issues with the game, this program will do that too
+- If you want to update your translations or fix issues with the game (such as all text being numbers), this program will do that too
 
 A reminder that you should **never** install or open WeChat on your emulator, you *will* get banned. Install WeChat on your actual phone and then scan the QR code on your emulator to log in.
 
