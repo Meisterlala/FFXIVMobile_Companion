@@ -1,5 +1,4 @@
-<img margin: auto width="880" height="583" alt="logo-index 1" src="https://github.com/user-attachments/assets/38cf535d-a8ab-466d-ba52-64cdb7622779" />
-
+<img margin: auto width="912" height="587" alt="logo-index 2" src="https://github.com/user-attachments/assets/ae667bf8-0645-4c1c-a2d8-1254a49a9e59" />
 
 # FFXIVM (FFXIV Mobile) Companion
 ### This works on android devices (no root required) and Mumu/Bluestacks emulators
