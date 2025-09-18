@@ -1,3 +1,5 @@
+<img margin: auto width="912" height="587" alt="logo-index 2" src="https://github.com/user-attachments/assets/ae667bf8-0645-4c1c-a2d8-1254a49a9e59" />
+
 # FFXIVM (FFXIV Mobile) Companion
 ### This works on android devices (no root required) and Mumu/Bluestacks emulators
 
@@ -16,15 +18,20 @@ Make sure you've enabled ADB in Bluestacks too (Settings -> Advanced -> turn on 
 ## Before You Start
 - If you do not have the game installed, you can download and install it through this program
 - If you have the game installed but not patched, you can patch it through this program to change languages to whatever you want
-- If you want to update your translations or fix issues with the game, this program will do that too
+- If you want to update your translations or fix issues with the game (such as all text being numbers), this program will do that too
 
 A reminder that you should **never** install or open WeChat on your emulator, you *will* get banned. Install WeChat on your actual phone and then scan the QR code on your emulator to log in.
 
 ## Usage
 
-Open the file you downloaded and follow the directions - it's that easy!  
-If you get a warning from Windows Smartscreen select `Run anyway` - [You can check out a virus scan of the exe here](https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1)  
-(or copy the URL and test it yourself)
+1. Open the file you downloaded - If you get a warning from Windows Smart Screen select `Run anyway` - [You can check out a virus scan of the exe here](<https://www.virustotal.com/gui/url/a24ebee2f5881af4e4d8ebdd4a0e233ff56debbf9011964f34e33a96fea3d384?nocache=1>) or copy the URL and test it yourself
+2. Select the language you want your game to be in
+3. Select how you want to connect to your device
+4. Select what you want to do:
+
+- If you don't have the game installed, you can select to install it (option A)
+- If you have the game installed but haven't done any modifications to make it into other languages yet, you'll need to do the Initial Setup (option 0)
+- If you just want to change the language or update the story patch, you can do that (Option 1)
 
 ## Known Issues
 
