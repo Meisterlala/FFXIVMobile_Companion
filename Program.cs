@@ -178,6 +178,11 @@ namespace FFXIVMobile_Companion
                         SelectedConnectionType = ConnectionType.BlueStacks;
                         WriteLine(Color.Magenta + "[ARGS] Connection type set to BlueStacks");
                     }
+                    if (argument.ToLower() == "-ldplayer")
+                    {
+                        SelectedConnectionType = ConnectionType.LDPlayer;
+                        WriteLine(Color.Magenta + "[ARGS] Connection type set to LDPlayer");
+                    }
                     if (argument.ToLower().Contains("-ip="))
                     {
                         ADB_IPAddress = argument.Replace("-ip=", "");
@@ -405,6 +410,11 @@ namespace FFXIVMobile_Companion
                         File.AppendAllText(LogFile, "-> User selected 4" + Environment.NewLine);
                         break;
 
+                    case "5":
+                        SelectedConnectionType = ConnectionType.LDPlayer;
+                        File.AppendAllText(LogFile, "-> User selected 5" + Environment.NewLine);
+                        break;
+
                     default:
                         if (SelectedConnectionType == ConnectionType.None) { WriteLine(Color.Red + " Invalid selection! Please try again." + Environment.NewLine); }
                         break;
@@ -461,7 +471,7 @@ namespace FFXIVMobile_Companion
                     }
                 }
             }
-            if (SelectedConnectionType == ConnectionType.WiFi || SelectedConnectionType == ConnectionType.MuMu || SelectedConnectionType == ConnectionType.BlueStacks)
+            if (SelectedConnectionType == ConnectionType.WiFi || SelectedConnectionType == ConnectionType.MuMu || SelectedConnectionType == ConnectionType.BlueStacks || SelectedConnectionType == ConnectionType.LDPlayer)
             {
                 ADB("disconnect");
                 int ConnectionAttempts = 0;
@@ -497,6 +507,15 @@ namespace FFXIVMobile_Companion
                                 Close(false);
                             }
                             ADB_IPAddress = "127.0.0.1:5555";
+                        }
+                        if (SelectedConnectionType == ConnectionType.LDPlayer)
+                        {
+                            if (ConnectionAttempts > 4)
+                            {
+                                WriteLine(Color.Red + "Failed to connect to LDPlayer! Please restart the emulator and try again.");
+                                Close(false);
+                            }
+                            ADB_IPAddress = "127.0.0.1:5554";
                         }
                     }
                     else
@@ -607,6 +626,7 @@ namespace FFXIVMobile_Companion
             WriteLine("2. An actual phone (" + Color.Blue + "over WiFi" + Color.Default + ")");
             WriteLine("3. MuMu");
             WriteLine("4. BlueStacks");
+            WriteLine("5. LDPlayer");
 
             Console.Write("\nType your choice: ");
             return Console.ReadKey().KeyChar.ToString();
@@ -738,10 +758,17 @@ namespace FFXIVMobile_Companion
             }
 
             WriteLine("Clearing local game data");
-            WriteLine(ADB("shell pm clear com.tencent.tmgp.fmgame"));
+            string ADBResult = ADB("shell pm clear com.tencent.tmgp.fmgame");
+            WriteLine(ADBResult);
+            if (ADBResult.Contains("ERROR - "))
+            {
+                WriteLine(Color.Red + "Failed to clear local game data. Please go to your settings and make sure that 'Disable Permission Monitoring' is enabled and try again.");
+                WriteLine(Color.Red + "If you have a MIUI phone, it may be called 'USB debugging (Security Settings)' instead.");
+                Close(false);
+            }
 
             WriteLine("Creating folder for language change");
-            string ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/");
+            ADBResult = ADB("shell mkdir -p /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Config/Android/");
             WriteLine(ADBResult);
             if (ADBResult.Contains("ERROR - "))
             {
@@ -852,7 +879,7 @@ namespace FFXIVMobile_Companion
                 WriteLine("Closing game");
                 WriteLine(ADB("shell am force-stop com.tencent.tmgp.fmgame"));
             }
-            WriteLine("Fixing permissions");
+            WriteLine(Environment.NewLine + "Fixing permissions");
             string ADBResult = ADB("shell chmod -R 777 /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/");
             if (ADBResult.Contains("ERROR - "))
             {
@@ -994,6 +1021,7 @@ namespace FFXIVMobile_Companion
                         case ConnectionType.WiFi:
                         case ConnectionType.MuMu:
                         case ConnectionType.BlueStacks:
+                        case ConnectionType.LDPlayer:
                             Command = "-s " + ADB_IPAddress + " " + Command;
                             break;
                     }
@@ -1018,6 +1046,7 @@ namespace FFXIVMobile_Companion
                 };
                 ADBProcess.Start();
                 string SuccessString = ADBProcess.StandardOutput.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
+                string ErrorString = ADBProcess.StandardError.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
                 ADBProcess.WaitForExit();
                 if (SuccessString.Contains("cannot connect") || SuccessString.Contains("cannot resolve"))
                 {
@@ -1033,7 +1062,6 @@ namespace FFXIVMobile_Companion
                 }
                 if (string.IsNullOrWhiteSpace(SuccessString))
                 {
-                    string ErrorString = ADBProcess.StandardError.ReadToEnd().Replace("/r/n", "").Replace("/n", "").Trim();
                     if (ErrorString.Contains("1 file pushed, 0 skipped"))
                     {
                         //ADB why? who hurt you?

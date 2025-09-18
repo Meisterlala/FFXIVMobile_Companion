@@ -49,6 +49,9 @@ namespace FFXIVMobile_Companion
         /// <summary>BlueStacks emulator, uses 'adb -s 127.0.0.1:5555' for commands</summary>
         public const string BlueStacks = "BlueStacks";
 
+        /// <summary>BlueStacks emulator, uses 'adb -s 127.0.0.1:5554' for commands</summary>
+        public const string LDPlayer = "LDPlayer";
+
         /// <summary>No connect type yet specified</summary>
         public const string None = "None";
     }
