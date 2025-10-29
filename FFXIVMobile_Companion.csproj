@@ -12,6 +12,20 @@
     <LangVersion>latest</LangVersion>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    
+    <!-- Assembly Information -->
+    <AssemblyTitle>FFXIVMobile Companion</AssemblyTitle>
+    <Description>Modifies your FFXIV Mobile game install with language options and fixes!</Description>
+    <AssemblyConfiguration></AssemblyConfiguration>
+    <Company>Arks-Layer (Aida Enna)</Company>
+    <Product></Product>
+    <Copyright>Copyright ©  2025</Copyright>
+    <Trademark></Trademark>
+    <NeutralLanguage></NeutralLanguage>
+    <ComVisible>false</ComVisible>
+    <Guid>08bf76e2-344a-439e-a5ac-b7ae7710eb7c</Guid>
+    <AssemblyVersion>1.0.0.5</AssemblyVersion>
+    <FileVersion>1.0.0.5</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>
