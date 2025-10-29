@@ -41,38 +41,11 @@ namespace FFXIVMobile_Companion
         public static string LogFile = Path.Combine(Directory.GetCurrentDirectory(), "FFXIVMC_log.txt");
         public static string InfoDumpFile = Path.Combine(Directory.GetCurrentDirectory(), "FFXIVMC_infodump.txt");
 
-        // Constants
-        private const int STD_OUTPUT_HANDLE = -11;
-
-        private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-
-        // P/Invoke signatures
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr GetStdHandle(int nStdHandle);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+        // Constants - removed Windows-specific constants
 
         private static void Main(string[] args)
         {
-            var handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-            if (!GetConsoleMode(handle, out uint mode))
-            {
-                Console.WriteLine("GetConsoleMode failed.");
-                return;
-            }
-
-            mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-
-            if (!SetConsoleMode(handle, mode))
-            {
-                Console.WriteLine("SetConsoleMode failed.");
-                return;
-            }
+            // Removed Windows-specific console mode setup - ANSI colors work by default on modern terminals
 
             if (File.Exists(LogFile)) { File.Delete(LogFile); }
             /*TODO:
@@ -300,7 +273,7 @@ namespace FFXIVMobile_Companion
             ██   ██ ██   ██ ██   ██     ██      ██   ██ ██      ██      ██  ██
             ██   ██ ██████  ██████       ██████ ██   ██ ███████  ██████ ██   ██
             */
-            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"adb\adb.exe")))
+            if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), @"adb/adb.exe")))
             {
                 WriteLine(Color.Red + "ADB Folder/file does not exist! (Checked \"" + Directory.GetCurrentDirectory() + "\")\nAttempting to fix by downloading required files...");
                 try
@@ -701,7 +674,7 @@ namespace FFXIVMobile_Companion
             foreach (string BadPakFile in RemoteStatus.BadFiles)
             {
                 WriteLine("Checking/Renaming " + BadPakFile.Split('/').Last());
-                //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak
+                //adb/adb -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak
                 ADBResult = ADB("shell mv " + BadPakFile + " " + BadPakFile + ".bak_" + Random());
                 if (ADBResult.Contains("ERROR - ") & ADBResult.Contains("No such file or directory") == false)
                 {
@@ -853,7 +826,7 @@ namespace FFXIVMobile_Companion
             foreach (string BadPakFile in RemoteStatus.BadFiles)
             {
                 WriteLine("Checking/Renaming " + BadPakFile.Split('/').Last());
-                //adb\adb.exe -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak
+                //adb/adb -s %ip% shell mv /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak /storage/emulated/0/Android/data/com.tencent.tmgp.fmgame/files/UE4Game/FGame/FGame/Saved/Downloader/1.0.2.0/Dolphin/Paks/1.0.2.12_Android_ASTC_12_P.pak.bak
                 ADBResult = ADB("shell mv " + BadPakFile + " " + BadPakFile + ".bak_" + Random());
                 if (ADBResult.Contains("ERROR - ") & ADBResult.Contains("No such file or directory") == false)
                 {
@@ -1036,7 +1009,7 @@ namespace FFXIVMobile_Companion
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = Path.Combine(Directory.GetCurrentDirectory(), @"adb\adb.exe"),
+                        FileName = Path.Combine(Directory.GetCurrentDirectory(), "adb", RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "adb.exe" : "adb"),
                         Arguments = Command,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,

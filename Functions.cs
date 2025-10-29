@@ -1,11 +1,11 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,16 +18,30 @@ namespace FFXIVMobile_Companion
 {
     internal class Functions
     {
+        public static async Task DownloadFileAsync(string address, string filename)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FFXIVM Companion");
+            client.Timeout = TimeSpan.FromSeconds(30);
+
+            using var response = await client.GetAsync(address);
+            response.EnsureSuccessStatusCode();
+
+            await using var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write, FileShare.None);
+            await response.Content.CopyToAsync(fileStream);
+        }
+
         public static void DownloadFile(string address, string filename)
         {
-            var cURL_Process = new Process();
-            var cURL_StartInfo = new ProcessStartInfo("cmd.exe", @"/C curl -L " + address  + " --output \"" + filename + "\"");
-            cURL_StartInfo.UseShellExecute = true;
-            cURL_StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
-            cURL_Process.StartInfo = cURL_StartInfo;
-
-            cURL_Process.Start();
-            cURL_Process.WaitForExit();
+            try
+            {
+                DownloadFileAsync(address, filename).GetAwaiter().GetResult();
+            }
+            catch
+            {
+                // Fallback to the original method if async fails
+                DownloadFileFallback(address, filename);
+            }
         }
 
         public static void DownloadFileFallback(string address, string filename)
@@ -107,11 +121,11 @@ namespace FFXIVMobile_Companion
                 return false;
             }
 
-            if (!IPAndPort.Contains(":")) 
+            if (!IPAndPort.Contains(":"))
             {
                 Console.WriteLine(Color.Red + "Please enter a valid IP address and port." + Color.Default);
                 Program.ADB_IPAddress = "1.2.3.4";
-                return false; 
+                return false;
             }
 
             return true;
